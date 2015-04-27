@@ -1,7 +1,7 @@
 /*
  * Forward4j.
  * Copyright (C) 2015 Forward4j Team.
- * http://
+ * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class Forwarder implements Runnable {
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
-  private final static String PREFIX = "forward4j.";
+  private final static String PREFIX = "forwarder4j.";
   private final int inPort;
   private final HostPort outDest;
   private final ExecutorService executor;

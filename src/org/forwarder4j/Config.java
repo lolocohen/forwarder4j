@@ -1,7 +1,7 @@
 /*
  * Foward4j.
  * Copyright (C) 2015 Foward4j Team.
- * http://
+ * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Properties;
 import org.slf4j.*;
 
 /**
- * 
+ * Loads and handles the configuration properties.
  * @author Laurent Cohen
  */
 class Config extends Properties {
@@ -34,7 +34,11 @@ class Config extends Properties {
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
   /**
-   * 
+   * Default path for the config file.
+   */
+  private static final String DEFAULT_CONFIG_FILE = "config/forwarder4j.properties";
+  /**
+   * Singleton instance of the configuration
    */
   private static Config instance = null;
 
@@ -45,7 +49,7 @@ class Config extends Properties {
   public static synchronized Config getConfiguration() {
     if (instance == null) {
       instance = new Config();
-      try (BufferedReader reader = new BufferedReader(new FileReader("config/forward4j.properties"))) {
+      try (BufferedReader reader = new BufferedReader(new FileReader(DEFAULT_CONFIG_FILE))) {
         instance.load(reader);
       } catch(Exception e) {
         log.debug(e.getMessage(), e);
