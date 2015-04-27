@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.forward4j;
+package org.forwarder4j;
 
 /**
  * Representation of a host + port information.

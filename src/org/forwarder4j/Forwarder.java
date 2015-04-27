@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-package org.forward4j;
+package org.forwarder4j;
 
 import java.net.*;
 import java.util.Set;
 import java.util.concurrent.*;
 
-import org.forward4j.Config.Filter;
+import org.forwarder4j.Config.Filter;
 import org.slf4j.*;
 
 /**

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.forward4j;
+package org.forwarder4j;
 
 import java.io.*;
 import java.net.Socket;

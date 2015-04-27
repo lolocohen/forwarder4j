@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/forward4j/src/org/forward4j/Forwarder.java"/>
+<listEntry value="/forward4j/src/org/forwarder4j/Forwarder.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -16,7 +16,7 @@
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/forward4j/lib/slf4j-log4j12-1.6.1.jar&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#13;&#10;"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.forward4j.Forwarder"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.forwarder4j.Forwarder"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="forward4j"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx265m -server -Djppf.config=port-forwarder.properties -Dlog4j.configuration=log4j.properties"/>
 </launchConfiguration>

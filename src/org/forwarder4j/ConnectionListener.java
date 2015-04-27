@@ -16,33 +16,15 @@
  * limitations under the License.
  */
 
-package org.forward4j;
+package org.forwarder4j;
 
-import java.util.EventObject;
+import java.util.EventListener;
 
 /**
  * 
  * @author Laurent Cohen
  */
-class ConnectionEvent extends EventObject {
-  private final byte[] data;
-  private final Throwable throwable;
-
-  public ConnectionEvent(final Connection connection, final byte[] data, final Throwable throwable) {
-    super(connection);
-    this.data = data;
-    this.throwable = throwable;
-  }
-
-  public Connection getConnection() {
-    return (Connection) getSource();
-  }
-
-  public byte[] getData() {
-    return data;
-  }
-
-  public Throwable getThrowable() {
-    return throwable;
-  }
+interface ConnectionListener extends EventListener {
+  void incomingData(final ConnectionEvent event);
+  void throwableRaised(final ConnectionEvent event);
 }
