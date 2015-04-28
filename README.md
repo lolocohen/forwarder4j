@@ -5,7 +5,7 @@ It allows you to forward network traffic from a local port to a remote server de
 
 ### Running the tool
 
-To run it, use of of the run scripts:
+To run it, use one of of the run scripts:
 - **run.bat** on Windows systems
 - **./run.sh** on Linux/Unix systems
 
@@ -20,7 +20,7 @@ Examples:
 forwarder4j.service.1081 = www.mysite.com:80
 forwarder4j.service.1082 = 1.2.3.4:80
 # also with IPv6 addresses
-forwarder4j.service.1081 = [FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
+forwarder4j.service.1083 = [FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
 ```
 
 #### Licensing

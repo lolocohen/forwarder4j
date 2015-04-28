@@ -1,6 +1,6 @@
 /*
- * Foward4j.
- * Copyright (C) 2015 Foward4j Team.
+ * Fowarder4j.
+ * Copyright (C) 2015 Fowarder4j Team.
  * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
