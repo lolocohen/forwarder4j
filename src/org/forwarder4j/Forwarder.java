@@ -19,14 +19,14 @@
 package org.forwarder4j;
 
 import java.net.*;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 import org.forwarder4j.Config.Filter;
 import org.slf4j.*;
 
 /**
- * 
+ * This is the main class for aunching Fowarder4j.
  * @author Laurent Cohen
  */
 public class Forwarder implements Runnable {
@@ -34,9 +34,21 @@ public class Forwarder implements Runnable {
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
+  /**
+   * Prefix for all configuration properties.
+   */
   private final static String PREFIX = "forwarder4j.";
+  /**
+   * The incoming local port.
+   */
   private final int inPort;
+  /**
+   * The destination remote host and port.
+   */
   private final HostPort outDest;
+  /**
+   * Executes write and close requests asynchronously and sequentially.
+   */
   private final ExecutorService executor;
 
   public static void main(String[] args) {
@@ -54,12 +66,21 @@ public class Forwarder implements Runnable {
         System.out.println("No port forwarding definition found in the conifguration, exiting.");
         System.exit(0);
       }
+      Set<Integer> ports = new TreeSet<>();
       for (String name: names) {
         String s = name.substring(servicePrefix.length());
-        int n = Integer.valueOf(s);
+        try {
+          int n = Integer.valueOf(s);
+          ports.add(n);
+        } catch(NumberFormatException e) {
+          log.error(String.format("property '%s' does not hold a valid port number, ignoring it", name));
+        }
+      }
+      for (Integer n: ports) {
+        String name = PREFIX + "service." + n;
         HostPort hp = HostPort.fromString(defs.getString(name));
         Forwarder server = new Forwarder(n, hp);
-        System.out.printf("Listening to incoming connections on port %d tunnelled to %s%n", n, hp);
+        System.out.printf("Forwarding local port %d to %s%n", n, hp);
         new Thread(server, "Server-" + n).start();
       }
     } catch (Exception e) {
@@ -67,6 +88,13 @@ public class Forwarder implements Runnable {
     }
   }
 
+  
+  
+  /**
+   * Intiialize this forwarder with the specified incomin port and outbound destination.
+   * @param inPort the incoming local port.
+   * @param outDest the destination remote host and port.
+   */
   private Forwarder(final int inPort, final HostPort outDest) {
     this.inPort = inPort;
     this.outDest = outDest;
@@ -76,7 +104,7 @@ public class Forwarder implements Runnable {
   @Override
   public void run() {
     try {
-      log.debug(String.format("Listening to incoming connections on port %d tunnelled to %s", inPort, outDest));
+      log.debug(String.format("Forwarding local port %d to %s", inPort, outDest));
       ServerSocket server = new ServerSocket(inPort);
       server.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
       while (true) {
@@ -105,9 +133,19 @@ public class Forwarder implements Runnable {
     }
   }
 
+  /**
+   * Listens to connection events from a connection and forwards the data read to another connection.
+   */
   private class Listener implements ConnectionListener {
+    /**
+     * The connection to forward data to.
+     */
     private final Connection otherConnection;
 
+    /**
+     * Intiialize this listener with the specified connection.
+     * @param otherConnection he connection to forward data to.
+     */
     public Listener(final Connection otherConnection) {
       this.otherConnection = otherConnection;
     }
@@ -140,7 +178,7 @@ public class Forwarder implements Runnable {
             log.debug(e.getMessage(), e);
           }
         }
-       });
+      });
     }
   }
 }

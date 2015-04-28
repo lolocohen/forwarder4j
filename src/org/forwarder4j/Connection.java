@@ -26,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.*;
 
 /**
- * 
+ * Instances of this class represent a network connection with the ability to notify registered listners of incoming data and I/O errors.
  * @author Laurent Cohen
  */
 class Connection implements Runnable, AutoCloseable {
@@ -34,17 +34,43 @@ class Connection implements Runnable, AutoCloseable {
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger(Connection.class);
+  /**
+   * A wrapper for the underlying socket connection.
+   */
   private SocketWrapper socketWrapper;
+  /**
+   * The listeners registered witrht his connection.
+   */
   private List<ConnectionListener> listeners = new CopyOnWriteArrayList<>();
+  /**
+   * Temporary buffer used to read data from the socket connection.
+   */
   private final byte[] buffer = new byte[Utils.TEMP_BUFFER_SIZE];
+  /**
+   * COunt of all bytes read.
+   */
   private long totalRead = 0L;
+  /**
+   * Count of all written bytes.
+   */
   private long totalWritten = 0L;
 
-  public Connection(final Socket socket) throws Exception {
+  /**
+   * Initialize from the specified established socket conneciton.
+   * @param socket the underlying socket for this connection.
+   * @throws IOException if any I/O error occurs.
+   */
+  public Connection(final Socket socket) throws IOException {
     socketWrapper = new SocketWrapper(socket);
   }
 
-  public Connection(final String host, final int port) throws Exception {
+  /**
+   * Initialize this connection with the specified host and port.
+   * @param host the host to connect to.
+   * @param port the port to connect to on the host.
+   * @throws IOException if any I/O error occurs while establishing the connection.
+   */
+  public Connection(final String host, final int port) throws IOException {
     socketWrapper = new SocketWrapper(host, port);
     log.debug("opened connection to {}", this);
   }
@@ -71,16 +97,29 @@ class Connection implements Runnable, AutoCloseable {
     }
   }
 
-  public void send(final byte[] data) throws Exception {
+  /**
+   * Send the specified data through this onnection.
+   * @param data the data to send.
+   * @throws IOException if any I/O error occurs.
+   */
+  public void send(final byte[] data) throws IOException {
     log.debug("writing {} bytes to {}", data.length, this);
     socketWrapper.write(data, 0, data.length);
     totalWritten += data.length;
   }
 
+  /**
+   * Add a listener to this connection.
+   * @param listener the listener to add. If {@code null}, then this method has no effect.
+   */
   public void addConnectionListener(ConnectionListener listener) {
     if (listener != null) listeners.add(listener);
   }
 
+  /**
+   * Remove a listener from this connection.
+   * @param listener the listener to remove. If {@code null}, then this method has no effect.
+   */
   public void removeConnectionListener(ConnectionListener listener) {
     if (listener != null) listeners.remove(listener);
   }

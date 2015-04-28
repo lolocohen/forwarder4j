@@ -21,27 +21,51 @@ package org.forwarder4j;
 import java.util.EventObject;
 
 /**
- * 
+ * Instances of this class represent events sent by a {@link Connection}.
  * @author Laurent Cohen
  */
 class ConnectionEvent extends EventObject {
+  /**
+   * The data that was read from the connection, if any.
+   */
   private final byte[] data;
+  /**
+   * A throwable that was read during an I/O operation on the connection, if any.
+   */
   private final Throwable throwable;
 
+  /**
+   * Initialize this event with the specified source connection, data and throwable.
+   * @param connection the source of this event.
+   * @param data the data that was read from the connection, if any.
+   * @param throwable the throwable that was read during an I/O operation on the connection, if any.
+   */
   public ConnectionEvent(final Connection connection, final byte[] data, final Throwable throwable) {
     super(connection);
     this.data = data;
     this.throwable = throwable;
   }
 
+  /**
+   * Get the source connection.
+   * @return an instance of {@link Connection}.
+   */
   public Connection getConnection() {
     return (Connection) getSource();
   }
 
+  /**
+   * Get the data that was read from the connection, if any.
+   * @return the data as a byte array, or {@code null} if none was received for this event.
+   */
   public byte[] getData() {
     return data;
   }
 
+  /**
+   * Get the throwable that was read during an I/O operation on the connection, if any.
+   * @return a {@link Throwable}, or {@code null} if no throwable was raised for this event.
+   */
   public Throwable getThrowable() {
     return throwable;
   }

@@ -30,6 +30,11 @@ class HostPort {
    */
   public boolean ipv6Address = false;
 
+  /**
+   * Initialize with the specified host and port.
+   * @param host the host or ip address.
+   * @param port the port number.
+   */
   public HostPort(String host, int port) {
     String s = host.trim();
     if (s.startsWith("[")) {
@@ -40,6 +45,11 @@ class HostPort {
     this.port = port;
   }
 
+  /**
+   * COnvert a string into a {@link HostPort} instance.
+   * @param source a string in the form {@code <host>:<port>}.
+   * @return
+   */
   public static HostPort fromString(String source) {
     String src = source.trim();
     boolean ipv6Address = false;

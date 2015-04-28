@@ -21,10 +21,18 @@ package org.forwarder4j;
 import java.util.EventListener;
 
 /**
- * 
+ * Interface for receiving notifications of {@link ConnectionEvent}s.
  * @author Laurent Cohen
  */
 interface ConnectionListener extends EventListener {
+  /**
+   * Called when data was received from the {@link Connection}.
+   * @param event encapsulates the connection and received data.
+   */
   void incomingData(final ConnectionEvent event);
+  /**
+   * Called when data an exception was raised during an I/O operation on a {@link Connection}.
+   * @param event encapsulates the connection and exception.
+   */
   void throwableRaised(final ConnectionEvent event);
 }
