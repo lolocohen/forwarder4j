@@ -18,65 +18,64 @@
 
 <project name='Forwarder4j' basedir="." default="run">
 
-	<!-- ========================================================================= -->
-	<!--                          Property definitions                             -->
-	<!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!--                          Property definitions                             -->
+  <!-- ========================================================================= -->
 
-	<property name="shared"      value="${basedir}/../shared"/>
-	<property name="lib"  value="${basedir}/lib"/>
-	<property name="config.dir"  value="${basedir}/config"/>
-	<property name="classes.dir" value="${basedir}/classes"/>	
-	<property name="src.dir"     value="${basedir}/src"/>
-	<property name="javadoc"     value="${basedir}/javadoc"/>
+  <property name="shared"      value="${basedir}/../shared"/>
+  <property name="lib"         value="${basedir}/lib"/>
+  <property name="config.dir"  value="${basedir}/config"/>
+  <property name="classes.dir" value="${basedir}/classes"/>
+  <property name="src.dir"     value="${basedir}/src"/>
+  <property name="javadoc"     value="${basedir}/javadoc"/>
 
-	<!-- ========================================================================= -->
-	<!--                           Classpath definitions                           -->
-	<!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!--                           Classpath definitions                           -->
+  <!-- ========================================================================= -->
 
-	<path id="project.classpath">
-		<pathelement location="${classes.dir}"/>
-		<pathelement location="${config.dir}"/>
-		<fileset dir="${lib}">
-			<include name="**/*.jar"/>
-		</fileset>
-	</path>
-
-  <path id="javadoc.classpath">
-		<pathelement location="${shared.img}"/>
-    <path refid="project.classpath"/>	
+  <path id="project.classpath">
+    <pathelement location="${classes.dir}"/>
+    <pathelement location="${config.dir}"/>
+    <fileset dir="${lib}">
+      <include name="**/*.jar"/>
+    </fileset>
   </path>
 
-	<!-- ========================================================================= -->
-	<!--                                    Clean                                  -->
-	<!-- ========================================================================= -->
+  <path id="javadoc.classpath">
+    <pathelement location="${shared.img}"/>
+    <path refid="project.classpath"/>
+  </path>
+
+  <!-- ========================================================================= -->
+  <!--                                    Clean                                  -->
+  <!-- ========================================================================= -->
 
   <target name="clean">
     <delete dir="${classes.dir}" quiet="true" includes="**/*.*"/>
-  </target>               
+  </target>
 
-	<!-- ========================================================================= -->
-	<!--                                    Init                                   -->
-	<!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!--                                    Init                                   -->
+  <!-- ========================================================================= -->
 
-	<target name="init" description="Initialize ressources">
- 		<mkdir dir="${classes.dir}"/>
-	</target>
+  <target name="init" description="Initialize ressources">
+    <mkdir dir="${classes.dir}"/>
+  </target>
 
 
-	<!-- ========================================================================= -->
-	<!--                                  Compile                                  -->
-	<!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!--                                  Compile                                  -->
+  <!-- ========================================================================= -->
 
-	<target name="compile" depends="clean, init">
-		<javac srcdir="" destdir="${classes.dir}"
-			debug="on" deprecation="off" optimize="on" includes="**/*.java">
-	    <classpath refid="project.classpath"/>
-	    <compilerarg line="-Xlint:unchecked"/>
-			<src path="${src.dir}"/>
-		</javac>
-		<copy todir="${classes.dir}">
-			<fileset dir="${src.dir}" excludes="**/*.java"/>
-		</copy>
+  <target name="compile" depends="clean, init">
+    <javac srcdir="" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includes="**/*.java">
+      <classpath refid="project.classpath"/>
+      <compilerarg line="-Xlint:unchecked"/>
+      <src path="${src.dir}" />
+    </javac>
+    <copy todir="${classes.dir}">
+      <fileset dir="${src.dir}" excludes="**/*.java"/>
+    </copy>
   </target>
 
   <!-- ========================================================================= -->
@@ -100,40 +99,39 @@
     <echo message="*** The file Forwarder4j.jar is now ready to be deployed ***"/>
     <echo/>
   </target>
-  
-	<!-- ========================================================================= -->
-	<!--                     Run the sample application                            -->
-	<!-- ========================================================================= -->
 
-	<target name="run">
-		<echo message="starting Forwarder4j ..."/>
-		<java fork="yes" classname="org.forwarder4j.Forwarder" classpathref="project.classpath">
-		</java>       
-	</target>
+  <!-- ========================================================================= -->
+  <!--                     Run the sample application                            -->
+  <!-- ========================================================================= -->
 
-	<!-- ========================================================================= -->
-	<!--                        Generate the Javadoc                               -->
-	<!-- ========================================================================= -->
+  <target name="run">
+    <echo message="starting Forwarder4j ..."/>
+    <java fork="yes" classname="org.forwarder4j.Forwarder" classpathref="project.classpath">
+    </java>
+  </target>
 
-	<target name="javadoc" description="Generate all javadoc">
-    <delete dir="${javadoc}" quiet="true"/>
-    <mkdir dir="${javadoc}"/>
-		<javadoc destdir="${javadoc}" access="private" Windowtitle="Forwarder4j"
-			packagenames="**/*.*" classpathref="javadoc.classpath" verbose="false" use="true" additionalparam="-quiet">
-			<packageset dir="${src.dir}"/>
+  <!-- ========================================================================= -->
+  <!--                        Generate the Javadoc                               -->
+  <!-- ========================================================================= -->
+
+  <target name="javadoc" description="Generate all javadoc">
+    <delete dir="${javadoc}" quiet="true" />
+    <mkdir dir="${javadoc}" />
+    <javadoc destdir="${javadoc}" access="private" Windowtitle="Forwarder4j" packagenames="**/*.*" classpathref="javadoc.classpath" verbose="false" use="true" additionalparam="-quiet">
+      <packageset dir="${src.dir}"/>
       <link href="https://docs.oracle.com/javase/7/docs/api"/>
-			<doctitle><![CDATA[Forwarder4j]]></doctitle>
-			<header>
-				<![CDATA[
-					<a href="https://github.com/lolocohen/forwarder4j" target="_top">Forwarder4j</a>
-				]]>
-			</header>
-			<bottom>
-				<![CDATA[
-					<font face="Arial" size=2 color="#6D78B6"><i>Copyright &copy; 2005-2015 JPPF Team.</i></font>
-				]]>
-			</bottom>
-		</javadoc>
-	</target>
+      <doctitle>
+        <![CDATA[Forwarder4j]]>
+      </doctitle>
+      <header>
+        <![CDATA[<a href="https://github.com/lolocohen/forwarder4j" target="_top">Forwarder4j</a>]]>
+      </header>
+      <bottom><![CDATA[
+        <font face="Arial" size=2 color="#6D78B6">
+          <i>Copyright &copy; 2005-2015 JPPF Team.</i>
+        </font>]]>
+      </bottom>
+    </javadoc>
+  </target>
 
-</project> 
+</project>
