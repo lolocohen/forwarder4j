@@ -2,6 +2,7 @@
 /classes/
 /build/
 /lib/
+/bin/build.number
 *.log
 /.settings/
 .classpath
