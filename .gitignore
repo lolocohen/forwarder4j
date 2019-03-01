@@ -1,5 +1,7 @@
-/classes/
-/build/
-/lib/
-/bin/build.number
-*.log
+/.metadata/
+/x-*/
+*.txt
+/*.bat
+*.zip
+/.recommenders/
+/logs/
