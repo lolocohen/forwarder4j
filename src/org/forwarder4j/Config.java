@@ -1,6 +1,6 @@
 /*
  * Fowarder4j.
- * Copyright (C) 2015 Fowarder4j Team.
+ * Copyright (C) 2015-2019 Fowarder4j Team.
  * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,10 +108,10 @@ class Config extends Properties {
       val = val.trim();
       try {
         intVal = Integer.valueOf(val);
-      } catch(NumberFormatException ignore) {
+      } catch(@SuppressWarnings("unused") NumberFormatException ignore) {
         try {
           intVal = Double.valueOf(val).intValue();
-        } catch(NumberFormatException ignore2) {
+        } catch(@SuppressWarnings("unused") NumberFormatException ignore2) {
         }
       }
     }
@@ -149,10 +149,10 @@ class Config extends Properties {
       val = val.trim();
       try {
         longVal = Long.valueOf(val);
-      } catch(NumberFormatException ignore) {
+      } catch(@SuppressWarnings("unused") NumberFormatException ignore) {
         try {
           longVal = Double.valueOf(val).longValue();
-        } catch(NumberFormatException ignore2) {
+        } catch(@SuppressWarnings("unused") NumberFormatException ignore2) {
         }
       }
     }
@@ -189,7 +189,7 @@ class Config extends Properties {
     if (val != null) {
       try {
         floatVal = Float.parseFloat(val.trim());
-      } catch(NumberFormatException e) {
+      } catch(@SuppressWarnings("unused") final NumberFormatException e) {
       }
     }
     return floatVal;
@@ -226,7 +226,7 @@ class Config extends Properties {
     if (val != null) {
       try {
         doubleVal = Double.parseDouble(val.trim());
-      } catch(NumberFormatException e) {
+      } catch(@SuppressWarnings("unused") final NumberFormatException e) {
       }
     }
     return doubleVal;
@@ -355,7 +355,7 @@ class Config extends Properties {
     if (val == null) return def;
     try {
       return InetAddress.getByName(val);
-    } catch(UnknownHostException e) {
+    } catch(@SuppressWarnings("unused") final UnknownHostException e) {
       return def;
     }
   }

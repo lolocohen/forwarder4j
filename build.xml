@@ -1,6 +1,6 @@
 <!--
   Forwarder4j.
-  Copyright (C) 2015 Forwarder4j Team.
+  Copyright (C) 2015-2019 Forwarder4j Team.
   https://github.com/lolocohen/forwarder4j
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project name='Forwarder4j' basedir="." default="run">
+<project name='Forwarder4j' basedir="." default="jar">
 
   <!-- ========================================================================= -->
   <!--                          Property definitions                             -->
@@ -28,6 +28,7 @@
   <property name="classes.dir" value="${basedir}/classes"/>
   <property name="src.dir"     value="${basedir}/src"/>
   <property name="javadoc"     value="${basedir}/javadoc"/>
+  <property name="version"     value="0.2"/>
 
   <!-- ========================================================================= -->
   <!--                           Classpath definitions                           -->
@@ -60,6 +61,9 @@
 
   <target name="init" description="Initialize ressources">
     <mkdir dir="${classes.dir}"/>
+    <tstamp>
+      <format property="readable.now" pattern="yyyy-MM-dd hh:mm z"/>
+    </tstamp>
   </target>
 
 
@@ -88,11 +92,8 @@
       <manifest>
         <attribute name="Main-Class" value="org.forwarder4j.Forwarder"/>
         <attribute name="Class-Path" value="lib/log4j-1.2.15.jar lib/slf4j-api-1.6.1.jar lib/slf4j-log4j12-1.6.1.jar"/>
-        <!--
-        <attribute name="JPPF-Version" value="${version.number}"/>
-        <attribute name="JPPF-Build" value="${build.number}"/>
-        <attribute name="JPPF-BuildDate" value="${readable.now}"/>
-        -->
+        <attribute name="Forwarder4j-Version" value="${version}"/>
+        <attribute name="Forwarder4j-BuildDate" value="${readable.now}"/>
       </manifest>
     </jar>
     <echo/>

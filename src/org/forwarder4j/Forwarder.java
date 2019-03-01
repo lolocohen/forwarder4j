@@ -1,6 +1,6 @@
 /*
  * Fowarder4j.
- * Copyright (C) 2015 Fowarder4j Team.
+ * Copyright (C) 2015-2019 Fowarder4j Team.
  * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ package org.forwarder4j;
 
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 import org.forwarder4j.Config.Filter;
 import org.slf4j.*;
@@ -46,10 +45,6 @@ public class Forwarder implements Runnable {
    * The destination remote host and port.
    */
   private final HostPort outDest;
-  /**
-   * Executes write and close requests asynchronously and sequentially.
-   */
-  private final ExecutorService executor;
 
   public static void main(String[] args) {
     try {
@@ -73,7 +68,7 @@ public class Forwarder implements Runnable {
           int n = Integer.valueOf(s);
           ports.add(n);
         } catch(NumberFormatException e) {
-          log.error(String.format("property '%s' does not hold a valid port number, ignoring it", name));
+          log.error(String.format("%s. Property '%s' does not hold a valid port number, ignoring it", e, name));
         }
       }
       for (Integer n: ports) {
@@ -87,46 +82,38 @@ public class Forwarder implements Runnable {
       e.printStackTrace();
     }
   }
-
-  
   
   /**
-   * Intiialize this forwarder with the specified incomin port and outbound destination.
+   * Initialize this forwarder with the specified incoming port and outbound destination.
    * @param inPort the incoming local port.
    * @param outDest the destination remote host and port.
    */
   private Forwarder(final int inPort, final HostPort outDest) {
     this.inPort = inPort;
     this.outDest = outDest;
-    executor = Executors.newFixedThreadPool(1);
   }
 
   @Override
   public void run() {
     try {
       log.debug(String.format("Forwarding local port %d to %s", inPort, outDest));
-      ServerSocket server = new ServerSocket(inPort);
+      final ServerSocket server = new ServerSocket(inPort);
       server.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
       while (true) {
         final Socket socket = server.accept();
-        executor.execute(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              socket.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
-              socket.setSendBufferSize(Utils.SOCKET_BUFFER_SIZE);
-              log.debug("accepted socket {}", socket);
-              Connection in = new Connection(socket);
-              Connection out = new Connection(outDest.host, outDest.port);
-              in.addConnectionListener(new Listener(out));
-              out.addConnectionListener(new Listener(in));
-              new Thread(out, "outgoing-receiver-" + outDest).start();
-              new Thread(in, "incoming-receiver-" + inPort).start();
-            } catch (Exception e) {
-              log.error(e.getMessage(), e);
-            }
-          }
-        });
+        try {
+          socket.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
+          socket.setSendBufferSize(Utils.SOCKET_BUFFER_SIZE);
+          log.debug("accepted socket {}", socket);
+          final Connection in = new Connection(socket);
+          final Connection out = new Connection(outDest.host, outDest.port);
+          in.addConnectionListener(new Listener(out));
+          out.addConnectionListener(new Listener(in));
+          out.run();
+          in.run();
+        } catch (Exception e) {
+          log.error(e.getMessage(), e);
+        }
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -152,33 +139,23 @@ public class Forwarder implements Runnable {
 
     @Override
     public void incomingData(final ConnectionEvent event) {
-      executor.execute(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            final int len = event.getData().length;
-            log.debug("writing {} bytes to {}", len, otherConnection);
-            otherConnection.send(event.getData());
-          } catch(Exception e) {
-            log.debug(e.getMessage(), e);
-          }
-        }
-      });
+      try {
+        final int len = event.getData().length;
+        log.debug("writing {} bytes to {}", len, otherConnection);
+        otherConnection.offer(event.getData());
+      } catch(Exception e) {
+        log.debug(e.getMessage(), e);
+      }
     }
 
     @Override
     public void throwableRaised(final ConnectionEvent event) {
-      executor.execute(new Runnable() {
-        @Override
-        public void run() {
-          log.debug("received throwable from {} : ", event.getConnection(), event.getThrowable());
-          try {
-            otherConnection.close();
-          } catch(Exception e) {
-            log.debug(e.getMessage(), e);
-          }
-        }
-      });
+      log.debug("received throwable from {} : ", event.getConnection(), event.getThrowable());
+      try {
+        otherConnection.close();
+      } catch(Exception e) {
+        log.debug(e.getMessage(), e);
+      }
     }
   }
 }

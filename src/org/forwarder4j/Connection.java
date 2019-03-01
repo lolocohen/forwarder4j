@@ -1,6 +1,6 @@
 /*
  * Fowarder4j.
- * Copyright (C) 2015 Fowarder4j Team.
+ * Copyright (C) 2015-2019 Fowarder4j Team.
  * https://github.com/lolocohen/forwarder4j
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ package org.forwarder4j;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 import org.slf4j.*;
 
@@ -33,7 +33,11 @@ class Connection implements Runnable, AutoCloseable {
   /**
    * Logger for this class.
    */
-  private static Logger log = LoggerFactory.getLogger(Connection.class);
+  private static final Logger log = LoggerFactory.getLogger(Connection.class);
+  /**
+   * Determines whether the debug level is enabled in the log configuration, without the cost of a method call.
+   */
+  private static final boolean debugEnabled = log.isDebugEnabled();
   /**
    * A wrapper for the underlying socket connection.
    */
@@ -47,13 +51,21 @@ class Connection implements Runnable, AutoCloseable {
    */
   private final byte[] buffer = new byte[Utils.TEMP_BUFFER_SIZE];
   /**
-   * COunt of all bytes read.
+   * Count of all bytes read.
    */
-  private long totalRead = 0L;
+  private long totalRead;
   /**
    * Count of all written bytes.
    */
-  private long totalWritten = 0L;
+  private long totalWritten;
+  /**
+   * 
+   */
+  final Receiver receiver = new Receiver();
+  /**
+   * 
+   */
+  private final Sender sender = new Sender();
 
   /**
    * Initialize from the specified established socket conneciton.
@@ -78,20 +90,11 @@ class Connection implements Runnable, AutoCloseable {
   @Override
   public void run() {
     try {
-      while (true) {
-        int n = socketWrapper.read(buffer, 0, buffer.length);
-        if (n < 0) throw new EOFException("EOF on " + socketWrapper);
-        else if (n > 0) {
-          log.debug("read {} bytes from {}", n, this);
-          totalRead += n;
-          byte[] tmp = new byte[n];
-          System.arraycopy(buffer, 0, tmp, 0, n);
-          ConnectionEvent event = new ConnectionEvent(this, tmp, null);
-          for (ConnectionListener listener: listeners) listener.incomingData(event);
-        }
-        else Thread.sleep(10L);
-      }
-    } catch (Exception e) {
+      final String hostPort = socketWrapper.getHost() + ":" + socketWrapper.getPort();
+      if (debugEnabled) log.debug("starting sender and receiver for {}", hostPort);
+      new Thread(sender, hostPort + "-Sender").start();
+      new Thread(receiver, hostPort + "-Receiver").start();
+    } catch (final Exception e) {
       ConnectionEvent event = new ConnectionEvent(this, null, e);
       for (ConnectionListener listener: listeners) listener.throwableRaised(event);
     }
@@ -102,10 +105,13 @@ class Connection implements Runnable, AutoCloseable {
    * @param data the data to send.
    * @throws IOException if any I/O error occurs.
    */
-  public void send(final byte[] data) throws IOException {
-    log.debug("writing {} bytes to {}", data.length, this);
+  public void offer(final byte[] data) throws IOException {
+    if (debugEnabled) log.debug("offering {} bytes to {}", data.length, this);
+    sender.toSendQueue.offer(data);
+    /*
     socketWrapper.write(data, 0, data.length);
     totalWritten += data.length;
+    */
   }
 
   /**
@@ -135,11 +141,67 @@ class Connection implements Runnable, AutoCloseable {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
-    sb.append(socketWrapper.getHost()).append(':').append(socketWrapper.getPort());
-    sb.append(", totalRead=").append(totalRead);
-    sb.append(", totalWritten=").append(totalWritten);
-    sb.append(']');
-    return sb.toString();
+    return new StringBuilder(getClass().getSimpleName()).append('[')
+      .append(socketWrapper.getHost()).append(':').append(socketWrapper.getPort())
+      .append(", totalRead=").append(totalRead)
+      .append(", totalWritten=").append(totalWritten)
+      .append(']').toString();
+  }
+
+  /**
+   * 
+   */
+  private class Receiver implements Runnable {
+    @Override
+    public void run() {
+      try {
+        if (debugEnabled) log.debug("starting receiver for {}", Connection.this);
+        while (socketWrapper.isOpened()) {
+          int n = socketWrapper.read(buffer, 0, buffer.length);
+          if (n < 0) throw new EOFException("EOF on " + socketWrapper);
+          else if (n > 0) {
+            if (debugEnabled) log.debug("read {} bytes from {}", n, Connection.this);
+            totalRead += n;
+            final byte[] tmp = new byte[n];
+            System.arraycopy(buffer, 0, tmp, 0, n);
+            ConnectionEvent event = new ConnectionEvent(Connection.this, tmp, null);
+            for (ConnectionListener listener: listeners) listener.incomingData(event);
+          }
+        }
+      } catch (final Exception e) {
+        sender.toSendQueue.offer(new byte[0]);
+        ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
+        for (ConnectionListener listener: listeners) listener.throwableRaised(event);
+      }
+    }
+  }
+
+  /**
+   * 
+   */
+  private class Sender implements Runnable {
+    /**
+     * The queue of buffers to send.
+     */
+    private final BlockingQueue<byte[]> toSendQueue = new LinkedBlockingQueue<>();
+
+    @Override
+    public void run() {
+      try {
+        if (debugEnabled) log.debug("starting sender for {}", Connection.this);
+        while (socketWrapper.isOpened()) {
+          final byte[] data = toSendQueue.take();
+          if (data.length == 0) break;
+          if (socketWrapper.isOpened()) {
+            if (debugEnabled) log.debug("writing {} bytes to {}", data.length, Connection.this);
+            socketWrapper.write(data, 0, data.length);
+            totalWritten += data.length;
+          }
+        }
+      } catch (final Exception e) {
+        ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
+        for (ConnectionListener listener: listeners) listener.throwableRaised(event);
+      }
+    }
   }
 }
