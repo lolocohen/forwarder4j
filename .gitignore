@@ -1,1 +1,5 @@
-/forwarder4j.log
+/classes/
+/build/
+/lib/
+/bin/build.number
+*.log
