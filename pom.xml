@@ -20,10 +20,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.forwarder4j</groupId>
   <artifactId>forwarder4j-parent</artifactId>
   <packaging>pom</packaging>
   <version>0.2-SNAPSHOT</version>
+
+  <name>Forwarder4j</name>
+  <description>A multihoming TCP port forwarder written in Java</description>
+  <url>https://github.com/lolocohen/forwarder4j</url>
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/lolocohen/forwarder4j/issues</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:https://github.com/lolocohen/forwarder4j</connection>
+    <developerConnection>scm:git:https://github.com/lolocohen/forwarder4j</developerConnection>
+    <url>https://github.com/lolocohen/forwarder4j</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>lolocohen</id>
+      <name>Laurent Cohen</name>
+      <email>laurent.cohen@jppf.org</email>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

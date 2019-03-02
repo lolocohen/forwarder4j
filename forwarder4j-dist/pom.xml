@@ -28,6 +28,33 @@
   <artifactId>forwarder4j-dist</artifactId>
   <packaging>pom</packaging>
 
+  <name>Forwarder4j</name>
+  <description>A multihoming TCP port forwarder written in Java</description>
+  <url>https://github.com/lolocohen/forwarder4j</url>
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/lolocohen/forwarder4j/issues</url>
+  </issueManagement>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:https://github.com/lolocohen/forwarder4j</connection>
+    <developerConnection>scm:git:https://github.com/lolocohen/forwarder4j</developerConnection>
+    <url>https://github.com/lolocohen/forwarder4j</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>lolocohen</id>
+      <name>Laurent Cohen</name>
+      <email>laurent.cohen@jppf.org</email>
+    </developer>
+  </developers>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
