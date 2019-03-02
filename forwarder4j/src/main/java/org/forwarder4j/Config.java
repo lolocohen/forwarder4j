@@ -34,6 +34,10 @@ class Config extends Properties {
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
   /**
+   * System property indicating the config file path.
+   */
+  private static final String CONFIG_FILE_PROP = "forwarder4j.config";
+  /**
    * Default path for the config file.
    */
   private static final String DEFAULT_CONFIG_FILE = "config/forwarder4j.properties";
@@ -49,7 +53,8 @@ class Config extends Properties {
   public static synchronized Config getConfiguration() {
     if (instance == null) {
       instance = new Config();
-      try (BufferedReader reader = new BufferedReader(new FileReader(DEFAULT_CONFIG_FILE))) {
+      final String location = System.getProperty(CONFIG_FILE_PROP);
+      try (BufferedReader reader = new BufferedReader(new FileReader((location != null) ? location : DEFAULT_CONFIG_FILE))) {
         instance.load(reader);
       } catch(Exception e) {
         log.debug(e.getMessage(), e);

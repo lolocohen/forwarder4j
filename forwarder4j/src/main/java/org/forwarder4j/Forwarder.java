@@ -20,8 +20,8 @@ package org.forwarder4j;
 
 import java.net.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
-import org.forwarder4j.Config.Filter;
 import org.slf4j.*;
 
 /**
@@ -38,6 +38,10 @@ public class Forwarder implements Runnable {
    */
   private final static String PREFIX = "forwarder4j.";
   /**
+   * A simple pattern to validate the CLI args.
+   */
+  private static final Pattern CLI_ARG_PATTERN = Pattern.compile("[0-9]+=.*");
+  /**
    * The incoming local port.
    */
   private final int inPort;
@@ -48,41 +52,64 @@ public class Forwarder implements Runnable {
 
   public static void main(String[] args) {
     try {
+      Map<Integer, String> ports = new TreeMap<>();
+      
+      if ((args != null) && (args.length > 0)) {
+        for (final String arg: args) {
+          if (CLI_ARG_PATTERN.matcher(arg).matches()) {
+            final int idx = arg.indexOf('=');
+            createForwarder(arg.substring(0, idx), arg.substring(idx + 1), ports);
+          } else {
+            System.out.printf("Argument '%s' does not conform to the pattern '<local_port>=<host>:<port>'\n", arg);
+          }
+        }
+      }
+
       Config config = Config.getConfiguration();
       final String servicePrefix = PREFIX + "service.";
-      Config defs = config.filter(new Filter() {
-        @Override
-        public boolean accepts(String name, String value) {
-          return (name != null) && name.startsWith(servicePrefix);
-        }
-      });
+      Config defs = config.filter((name, value) -> (name != null) && name.startsWith(servicePrefix));
       Set<String> names = defs.stringPropertyNames();
-      if ((names == null) || names.isEmpty()) {
-        System.out.println("No port forwarding definition found in the conifguration, exiting.");
-        System.exit(0);
-      }
-      Set<Integer> ports = new TreeSet<>();
-      for (String name: names) {
-        String s = name.substring(servicePrefix.length());
-        try {
-          int n = Integer.valueOf(s);
-          ports.add(n);
-        } catch(NumberFormatException e) {
-          log.error(String.format("%s. Property '%s' does not hold a valid port number, ignoring it", e, name));
+      if ((names != null) && !names.isEmpty()) {
+        for (String name: names) {
+          final String s = name.substring(servicePrefix.length());
+          createForwarder(s, defs.getProperty(name), ports);
         }
       }
-      for (Integer n: ports) {
-        String name = PREFIX + "service." + n;
-        HostPort hp = HostPort.fromString(defs.getString(name));
-        Forwarder server = new Forwarder(n, hp);
-        System.out.printf("Forwarding local port %d to %s%n", n, hp);
-        new Thread(server, "Server-" + n).start();
+
+      if (ports.isEmpty()) {
+        System.out.println("No entry defined, exiting.");
+        System.exit(0);
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
-  
+
+  /**
+   * Create a forwarder for the specified local port and target host/port.
+   * @param port the local port to forward through.
+   * @param target the target host and port to forward to.
+   * @param allPorts the set of already defined local port entries.
+   */
+  private static void createForwarder(final String portStr, final String target, final Map<Integer, String> allPorts) {
+    final int port;
+    try {
+      port = Integer.valueOf(portStr);
+    } catch(NumberFormatException e) {
+      log.error(String.format("%s. '%s' is not a valid port number, ignoring it", e, portStr));
+      return;
+    }
+    if (!allPorts.containsKey(port)) {
+      allPorts.put(port, target);
+      HostPort hp = HostPort.fromString(target);
+      Forwarder server = new Forwarder(port, hp);
+      System.out.printf("Forwarding local port %d to %s%n", port, hp);
+      new Thread(server, "Server-" + port).start();
+    } else {
+      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n", port, allPorts.get(port), target);
+    }
+  }
+
   /**
    * Initialize this forwarder with the specified incoming port and outbound destination.
    * @param inPort the incoming local port.
