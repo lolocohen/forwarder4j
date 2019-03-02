@@ -1,7 +1,16 @@
 # Forwarder4j
-Forwarder4j is a multihoming port forwarder written in Java.
+Forwarder4j is a multihoming TCP port forwarder written in Java.
 
 It allows you to forward network traffic from a local port to a remote server defined by its host name or IP address and a remote port.
+
+## Usage
+
+### Downloading and installing
+
+You can dowbnload the latest version from the [Github releases](https://github.com/lolocohen/forwarder4j/releases)
+
+To install, unzip `forwarder4j-dist-xxx.zip` anywhere on your file system.
+
 
 ### Running the tool
 
@@ -23,6 +32,14 @@ forwarder4j.service.1082 = 1.2.3.4:80
 forwarder4j.service.1083 = [FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
 ```
 
-#### Licensing
+## Building
+
+- clone the repository:
+  - `git clone git@github.com:jppf-grid/JPPF.git`
+  - or `git clone https://github.com/jppf-grid/JPPF.git`
+- build with `mvn clean install`
+
+
+## Licensing
 
 Forwarder4j is licensed under the terms of the [Apache License, v2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
