@@ -7,7 +7,7 @@ It allows you to forward network traffic from a local port to a remote server de
 
 ### Downloading and installing
 
-You can dowbnload the latest version from the [Github releases](https://github.com/lolocohen/forwarder4j/releases)
+You can download the latest version from the [Github releases](https://github.com/lolocohen/forwarder4j/releases)
 
 To install, unzip `forwarder4j-dist-xxx.zip` anywhere on your file system.
 
