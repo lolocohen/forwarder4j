@@ -36,19 +36,19 @@ class SocketWrapper implements AutoCloseable {
   /**
    * The underlying socket wrapped by this SocketClient.
    */
-  protected Socket socket = null;
+  protected Socket socket;
   /**
    * A reference to the underlying socket's output stream.
    */
-  protected DataOutputStream dos = null;
+  protected DataOutputStream dos;
   /**
    * A buffered stream built on top of to the underlying socket's input stream.
    */
-  protected DataInputStream dis = null;
+  protected DataInputStream dis;
   /**
    * The host the socket connects to.
    */
-  protected String host = null;
+  protected String host;
   /**
    * The port number on the host the socket connects to.
    */
@@ -56,7 +56,7 @@ class SocketWrapper implements AutoCloseable {
   /**
    * Flag indicating the opened state of the underlying socket.
    */
-  protected boolean opened = false;
+  protected boolean opened;
 
   /**
    * Initialize this socket client and connect it to the specified host on the specified port.

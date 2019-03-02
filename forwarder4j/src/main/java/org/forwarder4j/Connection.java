@@ -59,11 +59,11 @@ class Connection implements Runnable, AutoCloseable {
    */
   private long totalWritten;
   /**
-   * 
+   * Reads from the underlying socket in a separate thread.
    */
   final Receiver receiver = new Receiver();
   /**
-   * 
+   * Writes to the underlying socket in a separate thread.
    */
   private final Sender sender = new Sender();
 
@@ -108,10 +108,6 @@ class Connection implements Runnable, AutoCloseable {
   public void offer(final byte[] data) throws IOException {
     if (debugEnabled) log.debug("offering {} bytes to {}", data.length, this);
     sender.toSendQueue.offer(data);
-    /*
-    socketWrapper.write(data, 0, data.length);
-    totalWritten += data.length;
-    */
   }
 
   /**
@@ -149,7 +145,7 @@ class Connection implements Runnable, AutoCloseable {
   }
 
   /**
-   * 
+   * Reads from the underlying socket in a separate thread.
    */
   private class Receiver implements Runnable {
     @Override
@@ -157,27 +153,27 @@ class Connection implements Runnable, AutoCloseable {
       try {
         if (debugEnabled) log.debug("starting receiver for {}", Connection.this);
         while (socketWrapper.isOpened()) {
-          int n = socketWrapper.read(buffer, 0, buffer.length);
+          final int n = socketWrapper.read(buffer, 0, buffer.length);
           if (n < 0) throw new EOFException("EOF on " + socketWrapper);
           else if (n > 0) {
             if (debugEnabled) log.debug("read {} bytes from {}", n, Connection.this);
             totalRead += n;
             final byte[] tmp = new byte[n];
             System.arraycopy(buffer, 0, tmp, 0, n);
-            ConnectionEvent event = new ConnectionEvent(Connection.this, tmp, null);
-            for (ConnectionListener listener: listeners) listener.incomingData(event);
+            final ConnectionEvent event = new ConnectionEvent(Connection.this, tmp, null);
+            for (final ConnectionListener listener: listeners) listener.incomingData(event);
           }
         }
       } catch (final Exception e) {
         sender.toSendQueue.offer(new byte[0]);
-        ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
-        for (ConnectionListener listener: listeners) listener.throwableRaised(event);
+        final ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
+        for (final ConnectionListener listener: listeners) listener.throwableRaised(event);
       }
     }
   }
 
   /**
-   * 
+   * Writes to the underlying socket in a separate thread.
    */
   private class Sender implements Runnable {
     /**
@@ -199,8 +195,8 @@ class Connection implements Runnable, AutoCloseable {
           }
         }
       } catch (final Exception e) {
-        ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
-        for (ConnectionListener listener: listeners) listener.throwableRaised(event);
+        final ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
+        for (final ConnectionListener listener: listeners) listener.throwableRaised(event);
       }
     }
   }

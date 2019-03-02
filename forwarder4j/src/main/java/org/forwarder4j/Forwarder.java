@@ -52,7 +52,7 @@ public class Forwarder implements Runnable {
 
   public static void main(String[] args) {
     try {
-      Map<Integer, String> ports = new TreeMap<>();
+      final Map<Integer, String> ports = new TreeMap<>();
       
       if ((args != null) && (args.length > 0)) {
         for (final String arg: args) {
@@ -65,10 +65,10 @@ public class Forwarder implements Runnable {
         }
       }
 
-      Config config = Config.getConfiguration();
+      final Config config = Config.getConfiguration();
       final String servicePrefix = PREFIX + "service.";
-      Config defs = config.filter((name, value) -> (name != null) && name.startsWith(servicePrefix));
-      Set<String> names = defs.stringPropertyNames();
+      final Config defs = config.filter((name, value) -> (name != null) && name.startsWith(servicePrefix));
+      final Set<String> names = defs.stringPropertyNames();
       if ((names != null) && !names.isEmpty()) {
         for (String name: names) {
           final String s = name.substring(servicePrefix.length());

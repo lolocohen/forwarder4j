@@ -46,7 +46,7 @@ class HostPort {
   }
 
   /**
-   * COnvert a string into a {@link HostPort} instance.
+   * Convert a string into a {@link HostPort} instance.
    * @param source a string in the form {@code <host>:<port>}.
    * @return
    */
@@ -58,8 +58,8 @@ class HostPort {
       src = src.replace("[", "").replace("]", "");
       ipv6Address = true;
     }
-    int idx = src.lastIndexOf(':');
-    HostPort hp = new HostPort(src.substring(0, idx), Integer.valueOf(src.substring(idx + 1)));
+    final int idx = src.lastIndexOf(':');
+    final HostPort hp = new HostPort(src.substring(0, idx), Integer.valueOf(src.substring(idx + 1)));
     hp.ipv6Address = ipv6Address;
     return hp;
   }
