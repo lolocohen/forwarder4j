@@ -35,8 +35,8 @@ forwarder4j.service.1083 = [FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
 ## Building
 
 - clone the repository:
-  - `git clone git@github.com:jppf-grid/JPPF.git`
-  - or `git clone https://github.com/jppf-grid/JPPF.git`
+  - `git clone git@github.com:lolocohen/forwarder4j.git`
+  - or `git clone https://github.com/lolocohen/forwarder4j.git`
 - build with `mvn clean install`
 
 
