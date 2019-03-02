@@ -33,7 +33,7 @@ In case of duplicate definitions for a given port, the first valid one is used a
 Example: 
 
 ```ini
-./run.sh 2001=<www.space_odissey.com:2001 2002=97.42.10.24:80 2003=[FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
+./run.sh 2001=www.space_odissey.com:2001 2002=97.42.10.24:80 2003=[FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
 ```
 
 #### Definitions in a configuration file:
