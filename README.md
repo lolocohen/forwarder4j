@@ -15,8 +15,8 @@ To install, unzip `forwarder4j-dist-xxx.zip` anywhere on your file system.
 ### Running the tool
 
 To run it, use one of of the run scripts:
-- **run.bat** on Windows systems
-- **./run.sh** on Linux/Unix systems
+- **f4j.bat** on Windows systems
+- **./f4j.sh** on Linux/Unix systems
 
 ### Configuration
 
@@ -27,13 +27,13 @@ In case of duplicate definitions for a given port, the first valid one is used a
 #### Port forwarding definitions in the command line:
 
 ```
-./run.sh <local_port1>=<remote_host1>:<remote_port1> ... <local_portN>=<remote_hostN>:<remote_portN>
+./f4j.sh <local_port1>=<remote_host1>:<remote_port1> ... <local_portN>=<remote_hostN>:<remote_portN>
 ```
 
 Example: 
 
 ```ini
-./run.sh 2001=www.space_odissey.com:2001 2002=97.42.10.24:80 2003=[FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
+./f4j.sh 2001=www.space_odissey.com:2001 2002=97.42.10.24:80 2003=[FFF1:0002:FFF3:0004:FFF5:0006:FFF7:0008]:80
 ```
 
 #### Definitions in a configuration file:
