@@ -7,3 +7,4 @@
 /.settings/
 .classpath
 .project
+/forwarder4j.log.lck
