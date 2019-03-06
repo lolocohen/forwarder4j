@@ -24,7 +24,7 @@
   <groupId>org.forwarder4j</groupId>
   <artifactId>forwarder4j-parent</artifactId>
   <packaging>pom</packaging>
-  <version>${forwarder4j.version}</version>
+  <version>0.4.0-SNAPSHOT</version>
 
   <name>Forwarder4j</name>
   <description>A multihoming TCP port forwarder written in Java</description>
@@ -55,9 +55,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <forwarder4j.version>0.3.0</forwarder4j.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <log4j.version>1.2.17</log4j.version>
   </properties>
 
   <modules>

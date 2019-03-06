@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.forwarder4j</groupId>
     <artifactId>forwarder4j-parent</artifactId>
-    <version>${forwarder4j.version}</version>
+    <version>0.4.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>forwarder4j</artifactId>
