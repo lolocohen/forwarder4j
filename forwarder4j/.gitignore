@@ -4,6 +4,8 @@
 /build/
 /lib/
 *.log
+*.log.1
+*.lck
 /.settings/
 .classpath
 .project
