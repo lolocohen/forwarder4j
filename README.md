@@ -15,8 +15,8 @@ To install, unzip `forwarder4j-dist-xxx.zip` anywhere on your file system.
 ### Running the tool
 
 To run it, use one of of the run scripts:
-- **f4j.bat** on Windows systems
 - **./f4j.sh** on Linux/Unix systems
+- **f4j.bat** on Windows systems
 
 ### Configuration
 
@@ -57,6 +57,68 @@ By default, the configuration file is searched as `config/forwarder4j.properties
 ```ini
 java ... -Dforwarder4j.config=path/to/myConfig.properties org.forwarder4j.Forwarder 8089=www.myhost.com:80
 ```
+
+
+### Administration
+
+Forwarder4j can be administered remotely with a command-line tool:
+- **./f4j-admin.sh** on Linux/Unix
+- **f4j-admin.bat** on Windows
+
+To display usage instructions and the list of options, just type `./f4j-admin.sh -h`. This results in the following being printed to the console:
+
+~~~ini
+Forwarder4j administration tool usage
+to run the tool: [./f4j-admin.sh | f4j-admin.bat] options
+available options:
+-h, -?, --help               : Print these instructiosn and exit. Any other option is ignored
+-H, --admin-host <value>     : the host on which the admin is running (defaults to 'localhost')
+-p, --admin-port <value>     : the administrative port number (defaults to '8192')
+-c, --admin-commands <value> : the list of commands to perform, separated with comma (','),
+                             : semicolon (';'), or pipe ('|')
+  Available commands:
+    +<local_port>=<host>:<port> : adds/sets forwarding of host:port through local_port
+    -<local_port>               : removes any port forwarding via local_port
+    list                        : lists all current port forwarding definitions
+    stop                        : terminates Forwarder4j. Any command after this is ignored
+~~~
+
+#### Configuration
+
+By default, the administration service listens to port 8192. A different port can be configured in the `config/forwarder4j.properties` file:
+
+~~~ini
+# administration port
+forwarder4j.admin.port = 12345
+~~~
+
+
+
+#### Example:
+
+start Fowarder4j:
+
+~~~ini
+> f4j.bat
+> admin service running on port 8192
+> No entry defined
+~~~
+
+administrate:
+
+~~~ini
+> f4j-admin.bat -c +2000=localhost:8880;+2001=localhost:8880;list;-2001;list
+> forwarding port 2000 to localhost:8880
+> forwarding port 2001 to localhost:8880
+> List of entries:
+> - 2000=localhost:8880
+> - 2001=localhost:8880
+> port definition for '2001' was removed
+> List of entries:
+> - 2000=localhost:8880
+
+~~~
+
 
 
 ## Building
