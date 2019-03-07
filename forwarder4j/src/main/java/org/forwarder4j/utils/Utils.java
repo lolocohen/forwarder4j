@@ -16,32 +16,33 @@
  * limitations under the License.
  */
 
-package org.forwarder4j;
+package org.forwarder4j.utils;
 
-import org.slf4j.*;
+import org.forwarder4j.Config;
+import org.slf4j.Logger;
 
 
 /**
  * Utility methods and constants.
  * @author Laurent Cohen
  */
-class Utils {
+public class Utils {
   /**
    * Size of send and receive buffer for socket connections. Defaults to 32768.
    */
-  static int SOCKET_BUFFER_SIZE = Config.getConfiguration().getInt("forwarder4j.socket.buffer.size", 32*1024);
+  public static int SOCKET_BUFFER_SIZE = Config.getConfiguration().getInt("forwarder4j.socket.buffer.size", 32*1024);
   /**
    * Disable Nagle's algorithm to improve performance. Defaults to true.
    */
-  static boolean SOCKET_TCP_NODELAY = Config.getConfiguration().getBoolean("forwarder4j.socket.tcp_nodelay", true);
+  public static boolean SOCKET_TCP_NODELAY = Config.getConfiguration().getBoolean("forwarder4j.socket.tcp_nodelay", true);
   /**
    * Enable / disable keepalive. Defaults to false.
    */
-  static boolean SOCKET_KEEPALIVE = Config.getConfiguration().getBoolean("forwarder4j.socket.keepalive", false);
+  public static boolean SOCKET_KEEPALIVE = Config.getConfiguration().getBoolean("forwarder4j.socket.keepalive", false);
   /**
    * Size of temporary buffers (including direct buffers) used in I/O transfers. Defaults to 32768.
    */
-  static int TEMP_BUFFER_SIZE = Config.getConfiguration().getInt("forwarder4j.temp.buffer.size", 32*1024);
+  public static int TEMP_BUFFER_SIZE = Config.getConfiguration().getInt("forwarder4j.temp.buffer.size", 32*1024);
 
   /**
    * Attempt to close the specified closeable without logging an eventual error.

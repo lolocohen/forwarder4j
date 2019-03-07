@@ -18,12 +18,17 @@
 
 package org.forwarder4j;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.*;
+import org.forwarder4j.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Instances of this class represent a network connection with the ability to notify registered listners of incoming data and I/O errors.

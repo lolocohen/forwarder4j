@@ -18,21 +18,31 @@
 
 package org.forwarder4j;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
-import org.slf4j.*;
+import org.forwarder4j.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common abstract superclass for all socket clients. This class is provided as a convenience and provides
  * as set of common methods to all classes implementing the {@link org.jppf.comm.socket.SocketWrapper SocketWrapper} interface.
  * @author Laurent Cohen
  */
-class SocketWrapper implements AutoCloseable {
+public class SocketWrapper implements AutoCloseable {
   /**
    * Logger for this class.
    */
-  private static Logger log = LoggerFactory.getLogger(SocketWrapper.class);
+  private static final Logger log = LoggerFactory.getLogger(SocketWrapper.class);
   /**
    * The underlying socket wrapped by this SocketClient.
    */
@@ -86,6 +96,17 @@ class SocketWrapper implements AutoCloseable {
   }
 
   /**
+   * Write the specified string tot he socket.
+   * @param s the string to write.
+   * @throws IOException if any I/O error occurs.
+   */
+  public void writeString(final String s) throws IOException {
+    checkOpened();
+    dos.writeUTF(s);
+    flush();
+  }
+
+  /**
    * Send an array of bytes over a TCP socket connection.
    * @param data the data to send.
    * @param offset the position where to start reading data from the input array.
@@ -125,6 +146,16 @@ class SocketWrapper implements AutoCloseable {
       else count += n;
     }
     return count;
+  }
+
+  /**
+   * Read a string form the socket.
+   * @return a string.
+   * @throws IOException if any I/O error occurs.
+   */
+  public String readString() throws IOException {
+    checkOpened();
+    return dis.readUTF();
   }
 
   /**

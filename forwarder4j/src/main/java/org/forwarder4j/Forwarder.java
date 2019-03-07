@@ -18,14 +18,22 @@
 
 package org.forwarder4j;
 
-import java.net.*;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.io.IOException;
+import java.net.BindException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.*;
+import org.forwarder4j.admin.Admin;
+import org.forwarder4j.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This is the main class for aunching Fowarder4j.
+ * Instances of this class represent port fowarding definitions.
  * @author Laurent Cohen
  */
 public class Forwarder implements Runnable {
@@ -34,13 +42,17 @@ public class Forwarder implements Runnable {
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
   /**
+   * Determines whether the debug level is enabled in the log configuration, without the cost of a method call.
+   */
+  private static final boolean debugEnabled = log.isDebugEnabled();
+  /**
    * Prefix for all configuration properties.
    */
   private final static String PREFIX = "forwarder4j.";
   /**
-   * A simple pattern to validate the CLI args.
+   * The administration service.
    */
-  private static final Pattern CLI_ARG_PATTERN = Pattern.compile("[0-9]+=.*");
+  private static final Admin admin = new Admin();
   /**
    * The incoming local port.
    */
@@ -49,18 +61,32 @@ public class Forwarder implements Runnable {
    * The destination remote host and port.
    */
   private final HostPort outDest;
+  /**
+   * Whether this forwarder is closed.
+   */
+  private AtomicBoolean closed = new AtomicBoolean(false);
+  /**
+   * Whether this forwarder is bound to its local port.
+   */
+  private AtomicBoolean bound = new AtomicBoolean(false);
+  /**
+   * A server socket bound to {@link #inPort}.
+   */
+  private ServerSocket server;
 
-  public static void main(String[] args) {
+  public static void main(final String...args) {
     try {
+      new Thread(admin, "Admin").start();
+
       final Map<Integer, String> ports = new TreeMap<>();
       
       if ((args != null) && (args.length > 0)) {
         for (final String arg: args) {
-          if (CLI_ARG_PATTERN.matcher(arg).matches()) {
-            final int idx = arg.indexOf('=');
-            createForwarder(arg.substring(0, idx), arg.substring(idx + 1), ports);
-          } else {
-            System.out.printf("Argument '%s' does not conform to the pattern '<local_port>=<host>:<port>'\n", arg);
+          try {
+            final EntryDescriptor desc = EntryDescriptor.from(arg);
+            createForwarder(desc, ports);
+          } catch (final IllegalArgumentException e) {
+            System.out.println(e.getMessage());
           }
         }
       }
@@ -71,14 +97,18 @@ public class Forwarder implements Runnable {
       final Set<String> names = defs.stringPropertyNames();
       if ((names != null) && !names.isEmpty()) {
         for (String name: names) {
-          final String s = name.substring(servicePrefix.length());
-          createForwarder(s, defs.getProperty(name), ports);
+          try {
+            final String s = name.substring(servicePrefix.length());
+            final EntryDescriptor desc = EntryDescriptor.from(s, defs.getProperty(name));
+            createForwarder(desc, ports);
+          } catch (final IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+          }
         }
       }
 
       if (ports.isEmpty()) {
-        System.out.println("No entry defined, exiting.");
-        System.exit(0);
+        System.out.println("No entry defined");
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -90,23 +120,19 @@ public class Forwarder implements Runnable {
    * @param port the local port to forward through.
    * @param target the target host and port to forward to.
    * @param allPorts the set of already defined local port entries.
+   * @return the created forwarder, or {@code null} if it could not be created.
    */
-  private static void createForwarder(final String portStr, final String target, final Map<Integer, String> allPorts) {
-    final int port;
-    try {
-      port = Integer.valueOf(portStr);
-    } catch(NumberFormatException e) {
-      log.error(String.format("%s. '%s' is not a valid port number, ignoring it", e, portStr));
-      return;
-    }
-    if (!allPorts.containsKey(port)) {
-      allPorts.put(port, target);
-      HostPort hp = HostPort.fromString(target);
-      Forwarder server = new Forwarder(port, hp);
-      System.out.printf("Forwarding local port %d to %s%n", port, hp);
-      new Thread(server, "Server-" + port).start();
+  public static Forwarder createForwarder(final EntryDescriptor desc, final Map<Integer, String> allPorts) {
+    if ((allPorts == null) || !allPorts.containsKey(desc.getPort())) {
+      if (allPorts != null) allPorts.put(desc.getPort(), desc.getTarget().toString());
+      Forwarder server = new Forwarder(desc.getPort(), desc.getTarget());
+      System.out.printf("Forwarding local port %d to %s%n", desc.getPort(), desc.getTarget());
+      admin.setEntry(desc.getPort(), server);
+      new Thread(server, "Server-" + desc.getPort()).start();
+      return server;
     } else {
-      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n", port, allPorts.get(port), target);
+      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n", desc.getPort(), allPorts.get(desc.getPort()), desc.getTarget());
+      return null;
     }
   }
 
@@ -124,11 +150,28 @@ public class Forwarder implements Runnable {
   public void run() {
     try {
       log.debug(String.format("Forwarding local port %d to %s", inPort, outDest));
-      final ServerSocket server = new ServerSocket(inPort);
-      server.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
-      while (true) {
-        final Socket socket = server.accept();
+      final int max = 5;
+      int attempts = 0;
+      while (!bound.get() && (attempts < max)) {
         try {
+          server = new ServerSocket(inPort);
+          bound.set(true);
+          if (debugEnabled) log.debug("bound to port {} on attempt {}/{}", inPort, attempts + 1, max);
+        } catch (final BindException e) {
+          attempts++;
+          if (attempts >= max) {
+            if (debugEnabled) log.debug("failed to bind to port {} after {} attempts", inPort, max);
+            throw e;
+          }
+          if (debugEnabled) log.debug("could not bind to port {} on attempt {}/{}", inPort, attempts, max);
+          Thread.sleep(1000L);
+        }
+      }
+      server.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
+      while (!closed.get()) {
+        Socket socket = null;
+        try {
+          socket = server.accept();
           socket.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
           socket.setSendBufferSize(Utils.SOCKET_BUFFER_SIZE);
           log.debug("accepted socket {}", socket);
@@ -139,11 +182,21 @@ public class Forwarder implements Runnable {
           out.run();
           in.run();
         } catch (Exception e) {
-          log.error(e.getMessage(), e);
+          if (!closed.get()) log.error(e.getMessage(), e);
+          else log.info("Forwarder [{}] was closed", this);
         }
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
+      closed.set(true);
       log.error(e.getMessage(), e);
+    }
+  }
+
+  public void close() throws IOException {
+    if (closed.compareAndSet(false, true)) {
+      if (debugEnabled) log.debug("closing Forwarder[{}]", this);
+      bound.set(false);
+      server.close();
     }
   }
 
@@ -184,5 +237,18 @@ public class Forwarder implements Runnable {
         log.debug(e.getMessage(), e);
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return Integer.toString(inPort) + "=" + outDest;
+  }
+
+  public boolean isBound() {
+    return bound.get();
+  }
+
+  public boolean isClosed() {
+    return closed.get();
   }
 }

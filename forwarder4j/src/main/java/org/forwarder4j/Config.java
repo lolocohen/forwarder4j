@@ -18,17 +18,21 @@
 
 package org.forwarder4j;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Loads and handles the configuration properties.
  * @author Laurent Cohen
  */
-class Config extends Properties {
+public class Config extends Properties {
   /**
    * Logger for this class.
    */

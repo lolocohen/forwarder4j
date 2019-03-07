@@ -50,7 +50,7 @@ class HostPort {
    * @param source a string in the form {@code <host>:<port>}.
    * @return
    */
-  public static HostPort fromString(String source) {
+  public static HostPort from(String source) {
     String src = source.trim();
     boolean ipv6Address = false;
     // IPv6 address
