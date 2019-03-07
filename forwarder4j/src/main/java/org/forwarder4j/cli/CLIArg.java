@@ -47,6 +47,7 @@ class CLIArg {
    * @param switchArg if {@code true} then this argument has a value explicitly specified on the command line,
    * when {@code false} it is a boolean switch set to {@code true} when present or {@code false} when unspecified.
    * @param usage a string describing this argument's usage.
+   * @param aliases other names for this argument.
    */
   public CLIArg(final String name, final boolean switchArg, final String usage, final String...aliases) {
     this.name = name;

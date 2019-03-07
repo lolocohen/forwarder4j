@@ -23,19 +23,25 @@ package org.forwarder4j;
  * @author Laurent Cohen
  */
 class HostPort {
-  public final String host;
-  public final int port;
+  /**
+   * The host name or IP address.
+   */
+  final String host;
+  /**
+   * The prot number.
+   */
+  final int port;
   /**
    * Whether the host is an ipv6 address.
    */
-  public boolean ipv6Address = false;
+  boolean ipv6Address = false;
 
   /**
    * Initialize with the specified host and port.
    * @param host the host or ip address.
    * @param port the port number.
    */
-  public HostPort(String host, int port) {
+  private HostPort(String host, int port) {
     String s = host.trim();
     if (s.startsWith("[")) {
       s = s.replace("[", "").replace("]", "");
@@ -46,7 +52,7 @@ class HostPort {
   }
 
   /**
-   * Convert a string into a {@link HostPort} instance.
+   * Factory method which converts a string into a {@link HostPort} instance.
    * @param source a string in the form {@code <host>:<port>}.
    * @return
    */

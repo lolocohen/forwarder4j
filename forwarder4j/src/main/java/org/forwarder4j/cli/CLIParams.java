@@ -27,7 +27,6 @@ import org.forwarder4j.Config;
 
 /**
  * This class describes a set  of command-line arguments.
- * @param <T> the type of this set of arguments.
  * @author Laurent Cohen
  */
 public class CLIParams extends Config {
@@ -56,7 +55,8 @@ public class CLIParams extends Config {
    * Add a new argument with an explicit value.
    * @param name the name of the argument.
    * @param usage a string describing the argument's usage.
-   * @return return this object.
+   * @param aliases other names for the same argument.
+   * @return return this object, for method call chaining.
    */
   @SuppressWarnings("unchecked")
   public CLIParams add(final String name, final String usage, final String...aliases) {
@@ -67,13 +67,22 @@ public class CLIParams extends Config {
    * Add a new argument as a boollean switch.
    * @param name the name of the argument.
    * @param usage a string describing the argument's usage.
-   * @return return this object.
+   * @param aliases other names for the same argument.
+   * @return return this object, for method call chaining.
    */
   @SuppressWarnings("unchecked")
   public CLIParams addSwitch(final String name, final String usage, final String...aliases) {
     return add(name, true, usage, aliases);
   }
 
+  /**
+   * Add a new argument.
+   * @param name the name of the argument.
+   * @param isSwitch whether the argument is a boolean switch.
+   * @param usage a string describing the argument's usage.
+   * @param aliases other names for the same argument.
+   * @return return this object, for method call chaining.
+   */
   private CLIParams add(final String name, final boolean isSwitch, final String usage, final String...aliases) {
     final CLIArg cliArg = new CLIArg(name, isSwitch, usage, aliases);
     argDefs.put(name, cliArg);
@@ -101,7 +110,7 @@ public class CLIParams extends Config {
 
   /**
    * Print usage of the arguments.
-   * @return this object.
+   * @return this object, for method call chaining.
    */
   public CLIParams printUsage() {
     if (title != null) System.out.println(title);

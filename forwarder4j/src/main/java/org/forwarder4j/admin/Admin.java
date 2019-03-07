@@ -97,7 +97,7 @@ public class Admin implements Runnable {
     .setTitle("Forwarder4j administration tool usage")
     .setDescription(DESCRIPTION);
 
-  //----- admin client methods
+  //----- admin client methods -----//
 
   public static void main(final String...args) {
     try {
@@ -130,7 +130,7 @@ public class Admin implements Runnable {
     }
   }
 
-  //----- admin server methods
+  //----- admin server methods -----//
 
   @Override
   public void run() {

@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * This class describes a port forwarding definition.
  * @author Laurent Cohen
  */
 public class EntryDescriptor {
@@ -45,11 +45,21 @@ public class EntryDescriptor {
    */
   private final HostPort target;
 
+  /**
+   * Initialize with the specified local port and target host:port.
+   * @param port the local port to bind to.
+   * @param target the target end point to forward to/from.
+   */
   private EntryDescriptor(final int port, final HostPort target) {
     this.port = port;
     this.target = target;
   }
 
+  /**
+   * Factory method to create an {@code EntryDescriptor} from a string. 
+   * @param desc a string in the form {@code local_port=host:port}.
+   * @return a new {@code EntryDescriptor} instance.
+   */
   public static EntryDescriptor from(final String desc) {
     if (!CLI_ARG_PATTERN.matcher(desc).matches()) {
       throw new IllegalArgumentException("");
@@ -58,6 +68,12 @@ public class EntryDescriptor {
     return from(desc.substring(0, idx), desc.substring(idx + 1));
   }
 
+  /**
+   * Factory method to create an {@code EntryDescriptor} from 2 strings representing the local port and host:port target. 
+   * @param portStr a string representing a port number.
+   * @param target a string in the form {@code host:port}.
+   * @return a new {@code EntryDescriptor} instance.
+   */
   public static EntryDescriptor from(final String portStr, final String target) {
     int port = -1;
     try {
@@ -72,16 +88,14 @@ public class EntryDescriptor {
   }
 
   /**
-   * 
-   * @return 
+   * @return the port to forward through.
    */
   public int getPort() {
     return port;
   }
 
   /**
-   * 
-   * @return 
+   * @return the target of the forwarded traffic.
    */
   public HostPort getTarget() {
     return target;

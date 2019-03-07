@@ -74,6 +74,11 @@ public class Forwarder implements Runnable {
    */
   private ServerSocket server;
 
+  /**
+   * This is the entry point for the application.
+   * @param args the arguments, if any, each represent a port forwarding definition
+   * in the form {@code local_port=host:port}.
+   */
   public static void main(final String...args) {
     try {
       new Thread(admin, "Admin").start();
@@ -131,7 +136,8 @@ public class Forwarder implements Runnable {
       new Thread(server, "Server-" + desc.getPort()).start();
       return server;
     } else {
-      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n", desc.getPort(), allPorts.get(desc.getPort()), desc.getTarget());
+      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n",
+        desc.getPort(), allPorts.get(desc.getPort()), desc.getTarget());
       return null;
     }
   }
@@ -192,6 +198,10 @@ public class Forwarder implements Runnable {
     }
   }
 
+  /**
+   * Close this forwarder and release its resouurces.
+   * @throws IOException if any I/O error occurs.
+   */
   public void close() throws IOException {
     if (closed.compareAndSet(false, true)) {
       if (debugEnabled) log.debug("closing Forwarder[{}]", this);
@@ -244,10 +254,18 @@ public class Forwarder implements Runnable {
     return Integer.toString(inPort) + "=" + outDest;
   }
 
+  /**
+   * Determine whether this forwarder is bound to its local port.
+   * @return {@code true} if this forwarder is bound to its local port, {@code false} otherwise.
+   */
   public boolean isBound() {
     return bound.get();
   }
 
+  /**
+   * Determine whether this forwarder is closed.
+   * @return {@code true} if this forwarder is closed, {@code false} otherwise.
+   */
   public boolean isClosed() {
     return closed.get();
   }
