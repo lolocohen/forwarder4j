@@ -18,6 +18,7 @@
 
 package org.forwarder4j;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Instances of this class represent port fowarding definitions.
  * @author Laurent Cohen
  */
-public class Forwarder implements Runnable {
+public class Forwarder implements Runnable, Closeable {
   /**
    * Logger for this class.
    */
@@ -89,7 +90,7 @@ public class Forwarder implements Runnable {
         for (final String arg: args) {
           try {
             final EntryDescriptor desc = EntryDescriptor.from(arg);
-            createForwarder(desc, ports);
+            admin.createForwarder(desc, ports);
           } catch (final IllegalArgumentException e) {
             System.out.println(e.getMessage());
           }
@@ -105,7 +106,7 @@ public class Forwarder implements Runnable {
           try {
             final String s = name.substring(servicePrefix.length());
             final EntryDescriptor desc = EntryDescriptor.from(s, defs.getProperty(name));
-            createForwarder(desc, ports);
+            admin.createForwarder(desc, ports);
           } catch (final IllegalArgumentException e) {
             System.out.println(e.getMessage());
           }
@@ -121,33 +122,11 @@ public class Forwarder implements Runnable {
   }
 
   /**
-   * Create a forwarder for the specified local port and target host/port.
-   * @param port the local port to forward through.
-   * @param target the target host and port to forward to.
-   * @param allPorts the set of already defined local port entries.
-   * @return the created forwarder, or {@code null} if it could not be created.
-   */
-  public static Forwarder createForwarder(final EntryDescriptor desc, final Map<Integer, String> allPorts) {
-    if ((allPorts == null) || !allPorts.containsKey(desc.getPort())) {
-      if (allPorts != null) allPorts.put(desc.getPort(), desc.getTarget().toString());
-      Forwarder server = new Forwarder(desc.getPort(), desc.getTarget());
-      System.out.printf("Forwarding local port %d to %s%n", desc.getPort(), desc.getTarget());
-      admin.setEntry(desc.getPort(), server);
-      new Thread(server, "Server-" + desc.getPort()).start();
-      return server;
-    } else {
-      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n",
-        desc.getPort(), allPorts.get(desc.getPort()), desc.getTarget());
-      return null;
-    }
-  }
-
-  /**
    * Initialize this forwarder with the specified incoming port and outbound destination.
    * @param inPort the incoming local port.
    * @param outDest the destination remote host and port.
    */
-  private Forwarder(final int inPort, final HostPort outDest) {
+  public Forwarder(final int inPort, final HostPort outDest) {
     this.inPort = inPort;
     this.outDest = outDest;
   }
@@ -182,7 +161,7 @@ public class Forwarder implements Runnable {
           socket.setSendBufferSize(Utils.SOCKET_BUFFER_SIZE);
           log.debug("accepted socket {}", socket);
           final Connection in = new Connection(socket);
-          final Connection out = new Connection(outDest.host, outDest.port);
+          final Connection out = new Connection(outDest.getHost(), outDest.getPort());
           in.addConnectionListener(new Listener(out));
           out.addConnectionListener(new Listener(in));
           out.run();
@@ -202,6 +181,7 @@ public class Forwarder implements Runnable {
    * Close this forwarder and release its resouurces.
    * @throws IOException if any I/O error occurs.
    */
+  @Override
   public void close() throws IOException {
     if (closed.compareAndSet(false, true)) {
       if (debugEnabled) log.debug("closing Forwarder[{}]", this);

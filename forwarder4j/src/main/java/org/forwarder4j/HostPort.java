@@ -22,57 +22,58 @@ package org.forwarder4j;
  * Representation of a host + port information.
  * @author Laurent Cohen
  */
-class HostPort {
+public class HostPort {
   /**
    * The host name or IP address.
    */
-  final String host;
+  private final String host;
   /**
    * The prot number.
    */
-  final int port;
+  private final int port;
   /**
    * Whether the host is an ipv6 address.
    */
-  boolean ipv6Address = false;
+  private boolean ipv6Address;
 
   /**
    * Initialize with the specified host and port.
    * @param host the host or ip address.
    * @param port the port number.
    */
-  private HostPort(String host, int port) {
-    String s = host.trim();
-    if (s.startsWith("[")) {
-      s = s.replace("[", "").replace("]", "");
-      ipv6Address = true;
-    }
-    this.host = s;
+  private HostPort(String host, int port, final boolean ipv6Address) {
+    this.ipv6Address = ipv6Address;
+    this.host = host;
     this.port = port;
   }
 
   /**
    * Factory method which converts a string into a {@link HostPort} instance.
    * @param source a string in the form {@code <host>:<port>}.
-   * @return
+   * @return a {@link HostPort} instance.
    */
-  public static HostPort from(String source) {
+  public static HostPort from(final String source) {
     String src = source.trim();
-    boolean ipv6Address = false;
-    // IPv6 address
+    boolean ipv6 = false;
     if (src.startsWith("[")) {
       src = src.replace("[", "").replace("]", "");
-      ipv6Address = true;
+      ipv6 = true;
     }
     final int idx = src.lastIndexOf(':');
-    final HostPort hp = new HostPort(src.substring(0, idx), Integer.valueOf(src.substring(idx + 1)));
-    hp.ipv6Address = ipv6Address;
-    return hp;
+    return new HostPort(src.substring(0, idx), Integer.valueOf(src.substring(idx + 1)), ipv6);
   }
 
   @Override
   public String toString() {
     if (ipv6Address) return "[" + host + "]:" + port;
     return host + ":" + port;
+  }
+
+  public String getHost() {
+    return host;
+  }
+
+  public int getPort() {
+    return port;
   }
 }

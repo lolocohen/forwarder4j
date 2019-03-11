@@ -26,7 +26,7 @@
   <packaging>pom</packaging>
   <version>0.4.0</version>
 
-  <name>Forwarder4j</name>
+  <name>forwarder4j-parent</name>
   <description>A multihoming TCP port forwarder written in Java</description>
   <url>https://github.com/lolocohen/forwarder4j</url>
   <issueManagement>

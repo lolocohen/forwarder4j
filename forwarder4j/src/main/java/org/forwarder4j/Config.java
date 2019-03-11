@@ -36,7 +36,7 @@ public class Config extends Properties {
   /**
    * Logger for this class.
    */
-  private static Logger log = LoggerFactory.getLogger(Forwarder.class);
+  private static Logger log = LoggerFactory.getLogger(Config.class);
   /**
    * System property indicating the config file path.
    */

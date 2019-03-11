@@ -53,7 +53,7 @@ public class Admin implements Runnable {
   /**
    * The default admin port.
    */
-  public static final int DEFAULT_PORT = 8192;
+  private static final int DEFAULT_PORT = 8192;
   /**
    * Description of the "help" CLI param.
    */
@@ -79,9 +79,7 @@ public class Admin implements Runnable {
   /**
    * Description of the "commands" CLI param.
    */
-  private static final String DESCRIPTION = 
-    "to run the tool: [./f4j-admin.sh | f4j-admin.bat] options\n" +
-    "available options:";
+  private static final String DESCRIPTION = "to run the tool: [./f4j-admin.sh | f4j-admin.bat] options\navailable options:";
   /**
    * Mapping of existing {@link Forwarder forwarders} to their local port.
    */
@@ -104,7 +102,7 @@ public class Admin implements Runnable {
       final CLIParams params = CLI.parseArguments(args);
       if (params.has("-h")) params.printUsage();
       else {
-        final String host = params.getString("-h", "localhost");
+        final String host = params.getString("-H", "localhost");
         final int port = params.getInt("-p", DEFAULT_PORT);
         final String command = params.getString("-c", null);
         final String response = executeCommand(host, port, command);
@@ -123,7 +121,7 @@ public class Admin implements Runnable {
    * @return the response from the admin daemon.
    * @throws Exception if any error occurs.
    */
-  public static String executeCommand(final String host, final int port, final String command) throws Exception {
+  private static String executeCommand(final String host, final int port, final String command) throws Exception {
     try (final SocketWrapper connection = new SocketWrapper(host, port)) {
       connection.writeString(command);
       return connection.readString();
@@ -151,7 +149,7 @@ public class Admin implements Runnable {
     }
   }
 
-  public void setEntry(final int localPort, final Forwarder forwarder) {
+  private void setEntry(final int localPort, final Forwarder forwarder) {
     synchronized(forwarderMap) {
       forwarderMap.put(localPort, forwarder);
     }
@@ -227,7 +225,7 @@ public class Admin implements Runnable {
         forwarderMap.remove(port);
         executeRemove(desc.getPort());
       }
-      final Forwarder forwarder = Forwarder.createForwarder(desc, null);
+      final Forwarder forwarder = createForwarder(desc, null);
       if (forwarder != null) {
         while (!forwarder.isBound() && !forwarder.isClosed()) Thread.sleep(50L);
       }
@@ -286,5 +284,27 @@ public class Admin implements Runnable {
       }
     }
     return "the application is now ready to terminate";
+  }
+
+  /**
+   * Create a forwarder for the specified local port and target host/port.
+   * @param port the local port to forward through.
+   * @param target the target host and port to forward to.
+   * @param allPorts the set of already defined local port entries.
+   * @return the created forwarder, or {@code null} if it could not be created.
+   */
+  public Forwarder createForwarder(final EntryDescriptor desc, final Map<Integer, String> allPorts) {
+    if ((allPorts == null) || !allPorts.containsKey(desc.getPort())) {
+      if (allPorts != null) allPorts.put(desc.getPort(), desc.getTarget().toString());
+      Forwarder server = new Forwarder(desc.getPort(), desc.getTarget());
+      System.out.printf("Forwarding local port %d to %s%n", desc.getPort(), desc.getTarget());
+      setEntry(desc.getPort(), server);
+      new Thread(server, "Server-" + desc.getPort()).start();
+      return server;
+    } else {
+      System.out.printf("Port %d is already mapped to %s, cannot map it again to %s\n",
+        desc.getPort(), allPorts.get(desc.getPort()), desc.getTarget());
+      return null;
+    }
   }
 }

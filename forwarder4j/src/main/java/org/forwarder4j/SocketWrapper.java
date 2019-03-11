@@ -261,4 +261,8 @@ public class SocketWrapper implements AutoCloseable {
     sb.append(']');
     return sb.toString();
   }
+
+  public Socket getSocket() {
+    return socket;
+  }
 }

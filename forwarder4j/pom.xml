@@ -17,7 +17,8 @@
   limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +30,7 @@
 
   <artifactId>forwarder4j</artifactId>
 
-  <name>Forwarder4j</name>
+  <name>forwarder4j</name>
   <description>A multihoming TCP port forwarder written in Java</description>
   <url>https://github.com/lolocohen/forwarder4j</url>
   <issueManagement>
@@ -56,6 +57,10 @@
     </developer>
   </developers>
 
+  <properties>
+    <junit.version>5.4.0</junit.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -68,6 +73,39 @@
       <version>${slf4j.version}</version>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.1</version>
+        <configuration>
+          <systemProperties>
+            <java.util.logging.config.file>target/test-classes/logging.properties</java.util.logging.config.file>
+            <forwarder4j.config>target/test-classes/forwarder4j.properties</forwarder4j.config>
+          </systemProperties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

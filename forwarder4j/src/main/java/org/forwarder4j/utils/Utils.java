@@ -18,6 +18,10 @@
 
 package org.forwarder4j.utils;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.forwarder4j.Config;
 import org.slf4j.Logger;
 
@@ -88,5 +92,19 @@ public class Utils {
   public static String getMessage(final Throwable t) {
     if (t == null) return "null";
     return t.getClass().getName() + ": " + t.getMessage();
+  }
+
+  /**
+   * Print the statck trace of the specified {@code Throwable} as a string.
+   * @param t the {@code Throwable} to print.
+   * @return a string representation of the stack trace.
+   */
+  public static String getStackTrace(final Throwable t) {
+    try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+      t.printStackTrace(pw);
+      return sw.toString();
+    } catch (@SuppressWarnings("unused") final IOException e) {
+      return "";
+    }
   }
 }
