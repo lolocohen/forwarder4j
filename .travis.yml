@@ -1,8 +1,8 @@
-sudo: false
+#sudo: false
 
 language: java
 
-install: true
+#install: true
 
 before_script:
   - env -u _JAVA_OPTIONS
