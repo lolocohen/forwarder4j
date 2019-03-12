@@ -166,6 +166,7 @@ public class Admin implements Runnable {
       final String[] cmds = COMMAND_SPLIT_PATTERN.split(str);
       for (int i=0; i<cmds.length; i++) cmds[i] = cmds[i].trim();
       final StringBuilder response = new StringBuilder();
+      boolean stopped = false;
       for (final String cmd: cmds) {
         try {
           String ret = "";
@@ -175,9 +176,13 @@ public class Admin implements Runnable {
             try {
               ret = executeStop();
             } catch (final Exception e) {
-              log.error("error stopping the application", e);
-              ret = "";
+              final String msg = "error stopping the application";
+              log.error(msg, e);
+              ret = msg + ": " + e;
             }
+            stopped = true;
+            response.append(ret).append('\n');
+            break;
           }
           else if (cmd.startsWith("+")) ret= executeSet(cmd);
           else if (cmd.startsWith("-")) ret= executeRemove(cmd);
@@ -188,6 +193,10 @@ public class Admin implements Runnable {
         }
       }
       connection.writeString(response.toString());
+      if (stopped) {
+        log.info("stop requested, exiting Forwarder4j");
+        System.exit(0);
+      }
     } catch(final Exception e) {
       log.error(e.getMessage(), e);
     }
