@@ -24,13 +24,12 @@
   <parent>
     <groupId>org.forwarder4j</groupId>
     <artifactId>forwarder4j-parent</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>forwarder4j-dist</artifactId>
   <packaging>pom</packaging>
 
-  <name>forwarder4j-dist</name>
   <description>A multihoming TCP port forwarder written in Java</description>
   <url>https://github.com/lolocohen/forwarder4j</url>
   <issueManagement>
