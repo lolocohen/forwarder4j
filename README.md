@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lolocohen/forwarder4j.svg?branch=master)](https://travis-ci.org/lolocohen/forwarder4j)
+
 # Forwarder4j
 Forwarder4j is a multihoming TCP port forwarder written in Java.
 
