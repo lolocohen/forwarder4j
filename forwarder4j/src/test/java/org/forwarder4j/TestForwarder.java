@@ -18,33 +18,71 @@
 
 package org.forwarder4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
 
 import org.forwarder4j.test.ClientConnection;
 import org.forwarder4j.test.Server;
 import org.forwarder4j.test.ServerConnection;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
  * 
  * @author Laurent Cohen
  */
-public class TestForwarder {
+public class TestForwarder extends BaseTest {
+  private static final int REMOTE_PORT = 10_000;
+  private static Server server;
+
+  @BeforeAll
+  public static void setup() throws Exception {
+    server = new Server(REMOTE_PORT);
+  }
+
+  @AfterAll
+  public static void teardown() throws Exception {
+    server.close();
+  }
 
   @Test()
   public void testSimpleForwarding() throws Exception {
-    final int remotePort = 10_000, forwardingPort = 11_000;
-    try(final Server server = new Server(remotePort)) {
-      new Thread(server).start();
-      try (final Forwarder forwarder = new Forwarder(forwardingPort, HostPort.from("localhost:" + remotePort))) {
-        new Thread(forwarder).start();
-        Thread.sleep(50L);
-        try (final ClientConnection connection = new ClientConnection(forwardingPort)) {
-          final String msg = "hello forwarder4j!";
-          final String response = connection.send(msg).receive();
-          assertEquals(String.format(ServerConnection.RESPONSE_FORMAT, remotePort, msg), response);
-        }
+    final int forwardingPort = 11_000;
+    new Thread(server).start();
+    try (final Forwarder forwarder = new Forwarder(forwardingPort, HostPort.from("localhost:" + REMOTE_PORT))) {
+      new Thread(forwarder).start();
+      assertConditionTimeout(2000L, 50L, () -> forwarder.isBound());
+      try (final ClientConnection connection = new ClientConnection(forwardingPort)) {
+        final String msg = "hello forwarder4j!";
+        final String response = connection.send(msg).receive();
+        assertEquals(String.format(ServerConnection.RESPONSE_FORMAT, REMOTE_PORT, msg), response);
       }
+    }
+  }
+
+  @Test()
+  public void testForwarderMain() throws Exception {
+    final int[] ports = { 11_000, 11_001 };
+    final String target = "localhost:" + REMOTE_PORT;
+    final String[] args = new String[ports.length];
+    for (int i=0; i<ports.length; i++) args[i] = ports[i] + "=" + target;
+    Forwarder.main(args);;
+    Map<Integer, Forwarder> map = Forwarder.getAdmin().getForwarderMap();
+    assertNotNull(map);
+    assertEquals(ports.length, map.size());
+    for (final Forwarder forwarder: map.values()) assertConditionTimeout(2000L, 50L, () -> forwarder.isBound());
+    for (final int port: ports) {
+      try (final ClientConnection connection = new ClientConnection(port)) {
+        final String msg = "hello forwarder4j!";
+        final String response = connection.send(msg).receive();
+        assertEquals(String.format(ServerConnection.RESPONSE_FORMAT, REMOTE_PORT, msg), response);
+      }
+    }
+    for (final Forwarder forwarder: map.values()) {
+      forwarder.close();
+      assertConditionTimeout(2000L, 50L, () -> forwarder.isClosed());
     }
   }
 }

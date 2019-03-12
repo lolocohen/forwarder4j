@@ -249,4 +249,8 @@ public class Forwarder implements Runnable, Closeable {
   public boolean isClosed() {
     return closed.get();
   }
+
+  public static Admin getAdmin() {
+    return admin;
+  }
 }

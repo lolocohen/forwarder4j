@@ -316,4 +316,8 @@ public class Admin implements Runnable {
       return null;
     }
   }
+
+  public Map<Integer, Forwarder> getForwarderMap() {
+    return forwarderMap;
+  }
 }
