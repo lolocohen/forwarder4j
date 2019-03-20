@@ -22,12 +22,22 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.forwarder4j.SocketWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author Laurent Cohen
  */
 public abstract class BaseConnection<T extends BaseConnection<T>> implements AutoCloseable, Runnable {
+  /**
+   * Logger for this class.
+   */
+  private static Logger log = LoggerFactory.getLogger(ClientConnection.class);
+  /**
+   * Determines whether the debug level is enabled in the log configuration.
+   */
+  private static final boolean debugEnabled = log.isDebugEnabled();
   final SocketWrapper socketWrapper;
 
   public BaseConnection(final String host, final int port) throws IOException {
@@ -40,16 +50,27 @@ public abstract class BaseConnection<T extends BaseConnection<T>> implements Aut
 
   @Override
   public void close() throws IOException {
+    if (debugEnabled) log.debug("closing {}", this);
     socketWrapper.close();
   }
 
   @SuppressWarnings("unchecked")
   public T send(final String message) throws IOException {
+    if (debugEnabled) log.debug("{} sending '{}'", this, message);
     socketWrapper.writeString(message);
     return (T) this;
   }
 
   public String receive() throws IOException {
-    return socketWrapper.readString();
+    final String message = socketWrapper.readString();
+    if (debugEnabled) log.debug("{} received '{}'", this, message);
+    return message;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder(getClass().getSimpleName()).append('[')
+      .append(socketWrapper.getHost()).append(':').append(socketWrapper.getPort())
+      .append(']').toString();
   }
 }

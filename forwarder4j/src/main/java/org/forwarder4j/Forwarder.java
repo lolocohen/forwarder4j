@@ -43,7 +43,7 @@ public class Forwarder implements Runnable, Closeable {
    */
   private static Logger log = LoggerFactory.getLogger(Forwarder.class);
   /**
-   * Determines whether the debug level is enabled in the log configuration, without the cost of a method call.
+   * Determines whether the debug level is enabled in the log configuration.
    */
   private static final boolean debugEnabled = log.isDebugEnabled();
   /**
@@ -134,7 +134,7 @@ public class Forwarder implements Runnable, Closeable {
   @Override
   public void run() {
     try {
-      log.debug(String.format("Forwarding local port %d to %s", inPort, outDest));
+      if (debugEnabled) log.debug(String.format("Forwarding local port %d to %s", inPort, outDest));
       final int max = 5;
       int attempts = 0;
       while (!bound.get() && (attempts < max)) {
@@ -159,7 +159,7 @@ public class Forwarder implements Runnable, Closeable {
           socket = server.accept();
           socket.setReceiveBufferSize(Utils.SOCKET_BUFFER_SIZE);
           socket.setSendBufferSize(Utils.SOCKET_BUFFER_SIZE);
-          log.debug("accepted socket {}", socket);
+          if (debugEnabled) log.debug("accepted {}", socket);
           final Connection in = new Connection(socket);
           final Connection out = new Connection(outDest.getHost(), outDest.getPort());
           in.addConnectionListener(new Listener(out));
@@ -211,7 +211,7 @@ public class Forwarder implements Runnable, Closeable {
     public void incomingData(final ConnectionEvent event) {
       try {
         final int len = event.getData().length;
-        log.debug("writing {} bytes to {}", len, otherConnection);
+        if (debugEnabled) log.debug("writing {} bytes to {}", len, otherConnection);
         otherConnection.offer(event.getData());
       } catch(Exception e) {
         log.debug(e.getMessage(), e);
@@ -220,7 +220,7 @@ public class Forwarder implements Runnable, Closeable {
 
     @Override
     public void throwableRaised(final ConnectionEvent event) {
-      log.debug("received throwable from {} : ", event.getConnection(), event.getThrowable());
+      if (debugEnabled) log.debug("received throwable from {} : {}", event.getConnection(), event.getThrowable().toString());
       try {
         otherConnection.close();
       } catch(Exception e) {
@@ -252,5 +252,13 @@ public class Forwarder implements Runnable, Closeable {
 
   public static Admin getAdmin() {
     return admin;
+  }
+
+  public int getInPort() {
+    return inPort;
+  }
+
+  public HostPort getOutDest() {
+    return outDest;
   }
 }

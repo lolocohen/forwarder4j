@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.forwarder4j.utils.Utils;
 import org.slf4j.Logger;
@@ -43,6 +44,10 @@ class Connection implements Runnable, AutoCloseable {
    * Determines whether the debug level is enabled in the log configuration, without the cost of a method call.
    */
   private static final boolean debugEnabled = log.isDebugEnabled();
+  /**
+   * Determines whether the trace level is enabled in the log configuration, without the cost of a method call.
+   */
+  private static final boolean traceEnabled = log.isTraceEnabled();
   /**
    * A wrapper for the underlying socket connection.
    */
@@ -71,6 +76,10 @@ class Connection implements Runnable, AutoCloseable {
    * Writes to the underlying socket in a separate thread.
    */
   private final Sender sender = new Sender();
+  /**
+   * Whether this connection is closed.
+   */
+  private final AtomicBoolean closed = new AtomicBoolean(false);
 
   /**
    * Initialize from the specified established socket conneciton.
@@ -79,6 +88,7 @@ class Connection implements Runnable, AutoCloseable {
    */
   public Connection(final Socket socket) throws IOException {
     socketWrapper = new SocketWrapper(socket);
+    if (debugEnabled) log.debug("created {}", this);
   }
 
   /**
@@ -89,7 +99,7 @@ class Connection implements Runnable, AutoCloseable {
    */
   public Connection(final String host, final int port) throws IOException {
     socketWrapper = new SocketWrapper(host, port);
-    log.debug("opened connection to {}", this);
+    if (debugEnabled) log.debug("opened {}", this);
   }
 
   @Override
@@ -97,8 +107,8 @@ class Connection implements Runnable, AutoCloseable {
     try {
       final String hostPort = socketWrapper.getHost() + ":" + socketWrapper.getPort();
       if (debugEnabled) log.debug("starting sender and receiver for {}", hostPort);
-      new Thread(sender, hostPort + "-Sender").start();
-      new Thread(receiver, hostPort + "-Receiver").start();
+      new Thread(sender, hostPort + "-sender").start();
+      new Thread(receiver, hostPort + "-receiver").start();
     } catch (final Exception e) {
       ConnectionEvent event = new ConnectionEvent(this, null, e);
       for (ConnectionListener listener: listeners) listener.throwableRaised(event);
@@ -133,10 +143,13 @@ class Connection implements Runnable, AutoCloseable {
 
   @Override
   public void close() {
-    try {
-      if (socketWrapper != null) socketWrapper.close();
-    } catch (IOException e) {
-      e.printStackTrace();
+    if (closed.compareAndSet(false, true)) {
+      if (debugEnabled) log.debug("closing {}", this);
+      try {
+        if (socketWrapper != null) socketWrapper.close();
+      } catch (IOException e) {
+        log.error("error closing {}", this, e);
+      }
     }
   }
 
@@ -157,11 +170,11 @@ class Connection implements Runnable, AutoCloseable {
     public void run() {
       try {
         if (debugEnabled) log.debug("starting receiver for {}", Connection.this);
-        while (socketWrapper.isOpened()) {
+        while (!closed.get() && socketWrapper.isOpened()) {
           final int n = socketWrapper.read(buffer, 0, buffer.length);
           if (n < 0) throw new EOFException("EOF on " + socketWrapper);
           else if (n > 0) {
-            if (debugEnabled) log.debug("read {} bytes from {}", n, Connection.this);
+            if (traceEnabled) log.trace("read {} bytes from {}", n, Connection.this);
             totalRead += n;
             final byte[] tmp = new byte[n];
             System.arraycopy(buffer, 0, tmp, 0, n);
@@ -170,10 +183,12 @@ class Connection implements Runnable, AutoCloseable {
           }
         }
       } catch (final Exception e) {
+        if (debugEnabled) log.debug("exception in receiver of {} : {}", Connection.this, e.toString());
         sender.toSendQueue.offer(new byte[0]);
         final ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
         for (final ConnectionListener listener: listeners) listener.throwableRaised(event);
       }
+      if (debugEnabled) log.debug("ending receiver for {}", Connection.this);
     }
   }
 
@@ -190,19 +205,22 @@ class Connection implements Runnable, AutoCloseable {
     public void run() {
       try {
         if (debugEnabled) log.debug("starting sender for {}", Connection.this);
-        while (socketWrapper.isOpened()) {
+        while (!closed.get() && socketWrapper.isOpened()) {
           final byte[] data = toSendQueue.take();
           if (data.length == 0) break;
           if (socketWrapper.isOpened()) {
-            if (debugEnabled) log.debug("writing {} bytes to {}", data.length, Connection.this);
+            if (traceEnabled) log.trace("writing {} bytes to {}", data.length, Connection.this);
             socketWrapper.write(data, 0, data.length);
             totalWritten += data.length;
+            if (traceEnabled) log.trace("sent {} bytes to {}", data.length, Connection.this);
           }
         }
       } catch (final Exception e) {
+        if (debugEnabled) log.debug("exception in sender of {} : {}", Connection.this, e.toString());
         final ConnectionEvent event = new ConnectionEvent(Connection.this, null, e);
         for (final ConnectionListener listener: listeners) listener.throwableRaised(event);
       }
+      if (debugEnabled) log.debug("ending sender for {}", Connection.this);
     }
   }
 }

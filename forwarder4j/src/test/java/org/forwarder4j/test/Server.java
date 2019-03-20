@@ -43,6 +43,7 @@ public class Server implements Runnable, AutoCloseable {
 
   public Server(final int port) throws IOException {
     server = new ServerSocket(port);
+    log.info("started server on port {}", port);
   }
 
   @Override
@@ -50,6 +51,7 @@ public class Server implements Runnable, AutoCloseable {
     try {
       while (!isClosed()) {
         final Socket socket = server.accept();
+        log.info("{} accepted {}", this, socket);
         final ServerConnection connection = new ServerConnection(socket);
         connections.add(connection);
         new Thread(connection).start();
@@ -62,6 +64,7 @@ public class Server implements Runnable, AutoCloseable {
   @Override
   public void close() {
     if (closed.compareAndSet(false, true)) {
+      log.info("closing {}", this);
       try {
         server.close();
         for (final ServerConnection connection: connections) {
@@ -75,5 +78,14 @@ public class Server implements Runnable, AutoCloseable {
 
   public boolean isClosed() {
     return closed.get();
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder(getClass().getSimpleName()).append('[')
+      .append("port=").append(server.getLocalPort())
+      .append(", closed=").append(closed)
+      .append(", conntections=").append(connections.size())
+      .append(']').toString();
   }
 }

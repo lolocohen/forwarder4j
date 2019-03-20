@@ -18,12 +18,13 @@
 
 package org.forwarder4j;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * 
  * @author Laurent Cohen
  */
+//@ExtendWith(PrintTestClassExtension.class)
 public class BaseTest {
   /**
    * Wait until the specified condition is fulfilled, or the timeout expires, whichever happens first.
@@ -98,4 +99,13 @@ public class BaseTest {
     public boolean evaluateWithException() throws Exception;
   }
 
+  @SafeVarargs
+  public static <E> boolean isOneOf(final E elt, final E...array) {
+    if ((array == null) || (array.length == 0)) return false;
+    for (final E tmp: array) {
+      if (elt == tmp) return true;
+      if ((elt != null) && (tmp != null) && elt.equals(tmp)) return true;
+    }
+    return false;
+  }
 }

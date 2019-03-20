@@ -32,6 +32,13 @@ public class ServerConnection extends BaseConnection<ServerConnection> {
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger(ServerConnection.class);
+  /**
+   * Determines whether the debug level is enabled in the log configuration.
+   */
+  private static final boolean debugEnabled = log.isDebugEnabled();
+  /**
+   * Formt of the response to send for each received message.
+   */
   public static final String RESPONSE_FORMAT = "response from %d: %s";
 
   public ServerConnection(Socket socket) throws IOException {
@@ -40,13 +47,14 @@ public class ServerConnection extends BaseConnection<ServerConnection> {
 
   @Override
   public void run() {
+    if (debugEnabled) log.debug("starting {}", this);
     try {
       while (socketWrapper.isOpened()) {
         final String message = receive();
         send(String.format(RESPONSE_FORMAT, socketWrapper.getSocket().getLocalPort(), message));
       }
     } catch (final Exception e) {
-      if (socketWrapper.isOpened()) log.error(e.getMessage(), e);
+      if (debugEnabled) log.debug("error in {}: {}", this, e.toString());
     }
   }
 }
