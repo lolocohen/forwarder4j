@@ -1,11 +1,7 @@
-#sudo: false
-
 language: java
-
-#install: true
-
-before_script:
-  - env -u _JAVA_OPTIONS
 
 jdk:
   - openjdk8
+
+before_script:
+  - env -u _JAVA_OPTIONS
