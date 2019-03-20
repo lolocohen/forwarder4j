@@ -20,11 +20,14 @@ package org.forwarder4j;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import org.forwarder4j.test.TestExtensions;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 /**
  * 
  * @author Laurent Cohen
  */
-//@ExtendWith(PrintTestClassExtension.class)
+@ExtendWith(TestExtensions.class)
 public class BaseTest {
   /**
    * Wait until the specified condition is fulfilled, or the timeout expires, whichever happens first.

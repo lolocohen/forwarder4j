@@ -18,6 +18,13 @@
 
 package org.forwarder4j.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.LogManager;
+
+import org.forwarder4j.BaseTest;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -35,10 +42,9 @@ public class TestExtensions implements BeforeAllCallback, AfterAllCallback, Befo
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger("TEST");
-
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
-    printClassInfo(String.format("start of class %s", context.getRequiredTestClass().getName()));
+    resetLogConfig(context.getRequiredTestClass());
   }
 
   @Override
@@ -57,14 +63,28 @@ public class TestExtensions implements BeforeAllCallback, AfterAllCallback, Befo
     log.info(String.format("<<<<< end of method %s()", context.getRequiredTestMethod().getName()));
   }
 
-
-  private static void printClassInfo(final String info) {
+  public static void printClassInfo(final String info) {
     final int len = info.length() + 12;
     final StringBuilder sb = new StringBuilder(len);
     for (int i=0; i<len; i++) sb.append('*');
     final String bar = sb.toString();
     final String message = String.format("\n%s\n***** %s *****\n%s", bar, info, bar);
-    //System.out.printf("\n%s\n***** %s *****\n", info);
     log.info(message);
+  }
+
+  public static void resetLogConfig(final Class<?> clazz) throws Exception {
+    final Properties props = new Properties();
+    try (final InputStream is = BaseTest.class.getClassLoader().getResourceAsStream("logging.properties")) {
+      props.load(is);
+      props.setProperty("java.util.logging.FileHandler.pattern", "target/" + clazz.getSimpleName() + ".log");
+    }
+    try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+      props.store(baos, null);
+      baos.flush();
+      try (final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())) {
+        LogManager.getLogManager().readConfiguration(bais);
+      }
+    }
+    printClassInfo(String.format("start of class %s", clazz.getName()));
   }
 }

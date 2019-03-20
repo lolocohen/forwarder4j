@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Laurent Cohen
  */
-@ExtendWith(TestExtensions.class)
 public class TestForwarder extends BaseTest {
   /**
    * Logger for this class.
