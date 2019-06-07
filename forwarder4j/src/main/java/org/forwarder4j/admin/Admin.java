@@ -172,7 +172,7 @@ public class Admin implements Runnable {
           String ret = "";
           if (debugEnabled) log.debug("processing command '{}'", cmd);
           if (cmd.startsWith("list")) ret = executeList();
-          else if (cmd.startsWith("stop")) {
+          else if (cmd.startsWith("stop") || cmd.startsWith("clear")) {
             try {
               ret = executeStop();
             } catch (final Exception e) {
@@ -180,7 +180,7 @@ public class Admin implements Runnable {
               log.error(msg, e);
               ret = msg + ": " + e;
             }
-            stopped = true;
+            stopped = cmd.startsWith("stop");
             response.append(ret).append('\n');
             break;
           }

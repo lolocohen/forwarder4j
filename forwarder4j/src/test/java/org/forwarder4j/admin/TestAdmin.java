@@ -44,7 +44,7 @@ public class TestAdmin extends BaseTest {
   @AfterAll
   public static void teardown() throws Exception {
     server.close();
-    //Admin.executeCommand("localhost", 8192, "stop").trim();;
+    Admin.executeCommand("localhost", 8192, "clear").trim();
   }
 
   @Test()

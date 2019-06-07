@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.forwarder4j.admin.Admin;
 import org.forwarder4j.test.ClientConnection;
 import org.forwarder4j.test.Server;
 import org.forwarder4j.test.ServerConnection;
@@ -52,6 +53,7 @@ public class TestForwarder extends BaseTest {
   @AfterAll
   public static void teardown() throws Exception {
     server.close();
+    Admin.executeCommand("localhost", 8192, "clear").trim();
   }
 
   @Test()
