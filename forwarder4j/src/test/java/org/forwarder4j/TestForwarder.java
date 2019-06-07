@@ -54,6 +54,7 @@ public class TestForwarder extends BaseTest {
   public static void teardown() throws Exception {
     server.close();
     Admin.executeCommand("localhost", 8192, "clear").trim();
+    System.out.println("checking no more allocation: " + Admin.executeCommand("localhost", 8192, "list").trim());
   }
 
   @Test()
@@ -100,5 +101,6 @@ public class TestForwarder extends BaseTest {
       forwarder.close();
       assertConditionTimeout(2000L, 50L, () -> forwarder.isClosed());
     }
+    map.clear();
   }
 }

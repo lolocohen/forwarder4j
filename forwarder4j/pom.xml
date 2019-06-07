@@ -102,6 +102,9 @@
             <java.util.logging.config.file>target/test-classes/logging.properties</java.util.logging.config.file>
             <forwarder4j.config>target/test-classes/forwarder4j.properties</forwarder4j.config>
           </systemProperties>
+          <!--
+          <runOrder>alphabetical</runOrder>
+          -->
         </configuration>
       </plugin>
     </plugins>
