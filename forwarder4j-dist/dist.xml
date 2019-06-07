@@ -58,7 +58,7 @@
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
       <useStrictFiltering>false</useStrictFiltering>
-      <useProjectArtifact>true</useProjectArtifact>
+      <useProjectArtifact>false</useProjectArtifact>
       <scope>runtime</scope>
     </dependencySet>
   </dependencySets>
