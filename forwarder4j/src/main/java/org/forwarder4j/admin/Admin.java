@@ -121,7 +121,7 @@ public class Admin implements Runnable {
    * @return the response from the admin daemon.
    * @throws Exception if any error occurs.
    */
-  private static String executeCommand(final String host, final int port, final String command) throws Exception {
+  public static String executeCommand(final String host, final int port, final String command) throws Exception {
     try (final SocketWrapper connection = new SocketWrapper(host, port)) {
       connection.writeString(command);
       return connection.readString();
@@ -184,8 +184,8 @@ public class Admin implements Runnable {
             response.append(ret).append('\n');
             break;
           }
-          else if (cmd.startsWith("+")) ret= executeSet(cmd);
-          else if (cmd.startsWith("-")) ret= executeRemove(cmd);
+          else if (cmd.startsWith("+")) ret = executeSet(cmd);
+          else if (cmd.startsWith("-")) ret = executeRemove(cmd);
           else ret = "Command not understood, ignoring it: " + cmd;
           response.append(ret).append('\n');
         } catch (final Exception e) {
