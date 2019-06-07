@@ -26,13 +26,9 @@ import java.util.Map;
 import org.forwarder4j.test.ClientConnection;
 import org.forwarder4j.test.Server;
 import org.forwarder4j.test.ServerConnection;
-import org.forwarder4j.test.TestExtensions;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +41,6 @@ public class TestForwarder extends BaseTest {
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger(TestForwarder.class);
-  private static final int REMOTE_PORT = 10_000;
   private static Server server;
 
   @BeforeAll
@@ -57,16 +52,6 @@ public class TestForwarder extends BaseTest {
   @AfterAll
   public static void teardown() throws Exception {
     server.close();
-  }
-
-  @BeforeEach
-  @ExtendWith(TestExtensions.class)
-  public void setupInstance() throws Exception {
-  }
-
-  @AfterEach
-  @ExtendWith(TestExtensions.class)
-  public void teardownInstance() throws Exception {
   }
 
   @Test()

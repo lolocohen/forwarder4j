@@ -21,6 +21,8 @@ package org.forwarder4j;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.forwarder4j.test.TestExtensions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
@@ -29,6 +31,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
  */
 @ExtendWith(TestExtensions.class)
 public class BaseTest {
+  protected static final int REMOTE_PORT = 10_000;
+
+  @BeforeEach
+  @ExtendWith(TestExtensions.class)
+  public void setupInstance() throws Exception {
+  }
+
+  @AfterEach
+  @ExtendWith(TestExtensions.class)
+  public void teardownInstance() throws Exception {
+  }
+
   /**
    * Wait until the specified condition is fulfilled, or the timeout expires, whichever happens first.
    * @param condition the condition to check.

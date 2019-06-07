@@ -42,6 +42,7 @@ public class TestExtensions implements BeforeAllCallback, AfterAllCallback, Befo
    * Logger for this class.
    */
   private static Logger log = LoggerFactory.getLogger("TEST");
+
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
     resetLogConfig(context.getRequiredTestClass());
@@ -49,27 +50,28 @@ public class TestExtensions implements BeforeAllCallback, AfterAllCallback, Befo
 
   @Override
   public void afterAll(ExtensionContext context) throws Exception {
-    printClassInfo(String.format("end of class %s", context.getRequiredTestClass().getName()));
-    System.out.printf("***** end of class %s *****\n", context.getRequiredTestClass().getName());
+    printInfo(String.format("end of class %s", context.getRequiredTestClass().getName()));
   }
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
-    log.info(String.format(">>>>> start of method %s()", context.getRequiredTestMethod().getName()));
+    log.info(String.format(">>>>> start of method %s() <<<<<", context.getRequiredTestMethod().getName()));
   }
 
   @Override
   public void afterEach(ExtensionContext context) throws Exception {
-    log.info(String.format("<<<<< end of method %s()", context.getRequiredTestMethod().getName()));
+    log.info(String.format("<<<<< end of method %s() >>>>>", context.getRequiredTestMethod().getName()));
   }
 
-  public static void printClassInfo(final String info) {
+  public static void printInfo(final String info) {
     final int len = info.length() + 12;
     final StringBuilder sb = new StringBuilder(len);
     for (int i=0; i<len; i++) sb.append('*');
     final String bar = sb.toString();
-    final String message = String.format("\n%s\n***** %s *****\n%s", bar, info, bar);
+    log.info(bar);
+    final String message = String.format("***** %s *****", info);
     log.info(message);
+    log.info(bar);
   }
 
   public static void resetLogConfig(final Class<?> clazz) throws Exception {
@@ -85,6 +87,6 @@ public class TestExtensions implements BeforeAllCallback, AfterAllCallback, Befo
         LogManager.getLogManager().readConfiguration(bais);
       }
     }
-    printClassInfo(String.format("start of class %s", clazz.getName()));
+    printInfo(String.format("start of class %s", clazz.getName()));
   }
 }
